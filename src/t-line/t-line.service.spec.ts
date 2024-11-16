@@ -1,18 +1,192 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TLineService } from './t-line.service';
+import {Test, TestingModule} from '@nestjs/testing';
+import {describe, expect, it, beforeEach} from '@jest/globals';
+import {TLineService, PostState, UserRelation} from './t-line.service';
 
 describe('TLineService', () => {
-  let service: TLineService;
+    let service: TLineService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [TLineService],
-    }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [TLineService],
+        }).compile();
 
-    service = module.get<TLineService>(TLineService);
-  });
+        service = module.get<TLineService>(TLineService);
+    });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    /**create cache stuff
+     * TODO mutex while generating more posts prevent new generators
+     *
+     * pool:[{id, score, voteData, ..?}]
+     * seen:[id]
+     *
+     * sections:[{name,score,date,totalInFeed}]
+     * users:[{cachedUserData}]
+     *
+     * heartbeat:number
+     * lastBeat:number
+     */
+
+    /**mode decision module
+     * decide what mode
+     * - followed sec
+     * - recommended sec
+     * - followed thread
+     * - recommended thread
+     * - followed user
+     * - recommended user
+     * - promo posts
+     * - vibe stuff
+     * - ....
+     *
+     * calculate how many posts/categories(x) to show for mode
+     */
+
+    /**section-mode decision module
+     * takes in the cacheData for ordered sections
+     * pops top x sections
+     *
+     * // posts are queried and added to Q \\
+     *
+     * update date&total attribs
+     * re-insert based on date, total and score
+     */
+
+    /**Query posts from subsection
+     * Queries neo in sec
+     *    get thread name
+     *    get posts id and score (post score based on votes+total comments)
+     *    get postAuthors score
+     *    if exists get userAuthor and userMe relation (score,follow,muted)
+     *    if exists get userMe thread score
+     *    if exists get userMe seen/voted on post
+     *
+     * (sec)->(thread {name})->(post {id,score})->
+     * (userAuthor {score})-[relatedTo {score}]->(userMe)
+     *
+     * (userMe)-[{score}]->(thread)
+     * (userMe)-[{seen,voted}]->(post)
+     */
+
+    /**Math to determine whats most relevant
+     * note: 2 modes, relevant and recent
+     *     : relevant uses math; recent uses posted timestamp
+     *
+     * if cached seen post then dont show
+     *
+     * [cached] sec score
+     * thread relation (or % of sec score if null)
+     * post score
+     * user relation score
+     * author score
+     * post seen/vote
+     *
+     * splice into pool based on calculated score
+     */
+
+    function getAuthorRelation({
+                                   follows = false,
+                                   muted = false,
+                                   score = 10
+                               }:
+                                   {
+                                       follows?: boolean,
+                                       muted?: boolean,
+                                       score?: number
+                                   }): UserRelation {
+        return {follows, muted, score};
+    }
+
+    function getPostState({
+                              seen = false,
+                              weight = 1,
+                              vote = 0
+                          }:
+                              {
+                                  seen?: boolean,
+                                  weight?: number,
+                                  vote?: number
+                              }): PostState {
+        return {seen, weight, vote};
+    }
+
+    function relevanceTest({
+                               secScore = 10, postScore = 10,
+                               autScore = 10, thrScore = 10,
+                               autRelation = getAuthorRelation({}),
+                               postState = getPostState({})
+                           }:
+                               {
+                                   secScore?: number, postScore?: number,
+                                   autScore?: number, thrScore?: number,
+                                   autRelation?: UserRelation,
+                                   postState?: PostState
+                               }): number {
+        return service.calculateRelevanceScore(
+            secScore, postScore, autScore, thrScore, autRelation, postState
+        );
+    }
+
+    it("should calculate relevance as negative because the author is muted", () => {
+        const mutedUser: UserRelation = getAuthorRelation({muted: true});
+        const score = relevanceTest({autRelation: mutedUser});
+
+        expect(score).toBeLessThan(0);
+    })
+
+    it("should calculate relevance higher if follow=true (based on score)", () => {
+        const followedUser: UserRelation = getAuthorRelation({follows: true});
+        const testScore = relevanceTest({autRelation: followedUser});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should calculate relevance higher if autUser score higher", () => {
+        const scoredUser: UserRelation = getAuthorRelation({score: 20});
+        const testScore = relevanceTest({autRelation: scoredUser});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should calculate relevance*weight for seen=true", () => {
+        const weight = 0.5;
+        const postState: PostState = getPostState({seen: true, weight});
+        const testScore = relevanceTest({postState});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBe(baseScore * weight)
+    })
+
+    it("should calculate relevance higher for author users with higher score", () => {
+        const testScore = relevanceTest({autScore: 50});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should calculate relevance higher for secs with higher score", () => {
+        const testScore = relevanceTest({secScore: 50});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should calculate relevance higher for posts with higher score", () => {
+        const testScore = relevanceTest({postScore: 50});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should calculate relevance higher for threads with higher score", () => {
+        const testScore = relevanceTest({thrScore: 50});
+        const baseScore = relevanceTest({});
+
+        expect(testScore).toBeGreaterThan(baseScore);
+    })
 });
