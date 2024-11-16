@@ -35,4 +35,49 @@ export class TLineService {
         //if authRel->muted then negative score
         return 1;
     }
+
+    rankPosts(){
+        //data in: raw post data
+        //for each post call calculateRelevanceScore; drop -ve posts then calculateTotalSeenWeight
+        //put in cache Q in ranked position && update sections cache
+    };
+
+    decideMode(){
+        //decides what mode to load posts for
+    }
+
+    calculateTotalSeenWeight(score:number, seen:number): number{
+        return 0
+    }
+
+    queryFollowedSectionPosts(){
+        //pop x sections from cache
+        //query from neo || mock
+        //remove cached IDs (seen&pool)
+
+        //rank posts
+
+        //update section[x] data
+        //splice section[x] into cache (based on sec score && total seen)
+    }
+
+    getCache(){
+        //returns current cache
+    }
+    createCache(){
+        //init new object
+    }
+
+
+    //called internally from program and from other internal CHOMP services
+    async generateBlock(total:number){
+        //adds total posts to the tline pool
+        //these should be generated behind the scenes
+    }
+
+    //This is a client entry-point
+    getBlock(total: number){
+        // if(available < total) there should be waiting for posts to become available
+        // returns the top total IDs from the pool
+    }
 }

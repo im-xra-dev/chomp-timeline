@@ -20,10 +20,12 @@ describe('TLineService', () => {
     /**create cache stuff
      * TODO mutex while generating more posts prevent new generators
      *
-     * pool:[{id, score, voteData, ..?}]
+     * pool:[{id, score, voteData, addedOn ..?}]
+     * (note addedOn tracks when a post was added to the pool, old posts are killed)
+     *
      * seen:[id]
      *
-     * sections:[{name,score,date,totalInFeed}]
+     * sections:[{name,score,datetime,totalInFeed}]
      * users:[{cachedUserData}]
      *
      * heartbeat:number
@@ -51,6 +53,9 @@ describe('TLineService', () => {
      *
      * // posts are queried and added to Q \\
      *
+     * Removes any posts already in cache
+     * Rank posts
+     *
      * update date&total attribs
      * re-insert based on date, total and score
      */
@@ -69,6 +74,7 @@ describe('TLineService', () => {
      *
      * (userMe)-[{score}]->(thread)
      * (userMe)-[{seen,voted}]->(post)
+     *
      */
 
     /**Math to determine whats most relevant
@@ -188,5 +194,23 @@ describe('TLineService', () => {
         const baseScore = relevanceTest({});
 
         expect(testScore).toBeGreaterThan(baseScore);
+    })
+
+    it("should weight posts lower if more from this category have already been shown", () => {
+        const score = 100;
+        const seen = 0;
+        const moreSeen = service.calculateTotalSeenWeight(score, seen + 1);
+        const lessSeen = service.calculateTotalSeenWeight(score, seen);
+
+        expect(moreSeen).toBeLessThan(lessSeen);
+    })
+
+    it("should weight posts lower if seen is the same and but score is lower", () => {
+        const score = 100;
+        const seen = 10;
+        const highScore = service.calculateTotalSeenWeight(score, seen);
+        const lowScore = service.calculateTotalSeenWeight(score-1, seen);
+
+        expect(highScore).toBeGreaterThan(lowScore);
     })
 });
