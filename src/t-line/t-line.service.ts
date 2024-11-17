@@ -26,6 +26,16 @@ import {Injectable} from '@nestjs/common';
 export type UserRelation = { follows: boolean, muted: boolean, score: number }
 export type PostState = { weight: number, seen: boolean, vote: number }
 
+export type DiscoverParams = { mode: discoveryModes, count: number };
+
+export enum discoveryModes {
+    FOLLOWED_SUBSECTION,
+    RECOMMENDED_SUBSECTION,
+    FOLLOWED_USER,
+    RECOMMENDED_USER,
+    PROMOTED,
+}
+
 @Injectable()
 export class TLineService {
     calculateRelevanceScore(secScore: number, postScore: number,
@@ -36,21 +46,45 @@ export class TLineService {
         return 1;
     }
 
-    rankPosts(){
+    rankPosts() {
         //data in: raw post data
         //for each post call calculateRelevanceScore; drop -ve posts then calculateTotalSeenWeight
         //put in cache Q in ranked position && update sections cache
     };
 
-    decideMode(){
+    decideMode(): discoveryModes {
+        //TODO: initial implementation will only focus on followed secs
         //decides what mode to load posts for
+        return discoveryModes.FOLLOWED_SUBSECTION;
     }
 
-    calculateTotalSeenWeight(score:number, seen:number): number{
+    calculateTotalSeenWeight(score: number, seen: number): number {
         return 0
     }
 
-    queryFollowedSectionPosts(){
+    calculateSectionsToQuery(postSlots: number, secsAvailable: number): number{
+        //slots is the number of posts to be loaded
+
+        //return total <= secsAvailable
+        //throw if either input <=0
+
+        // aim for 3 posts per sec
+
+        //
+        // 1 slots = 1 sec
+        // 2 slots = 1 sec
+        // 3 slots = 1 sec
+        // 4 slots = 2 sec
+        // 5 slots = 2 sec
+        // 6 slots = 2 sec
+        // 7 slots = 3 sec
+        // 8 slots = 3 sec
+        // 9 slots = 3 sec
+        return 0;
+    }
+
+    queryFollowedSectionPosts() {
+        // x = calculateSectionsToQuery
         //pop x sections from cache
         //query from neo || mock
         //remove cached IDs (seen&pool)
@@ -61,23 +95,27 @@ export class TLineService {
         //splice section[x] into cache (based on sec score && total seen)
     }
 
-    getCache(){
+    getCache() {
         //returns current cache
     }
-    createCache(){
+
+    createCache() {
         //init new object
     }
 
 
     //called internally from program and from other internal CHOMP services
-    async generateBlock(total:number){
-        //adds total posts to the tline pool
+    async generateBlock(total: number) {
+        //adds total posts to the tline pool and seen lookup
         //these should be generated behind the scenes
+
+        //decide mode
+        //if followed sections then query followed sections
     }
 
     //This is a client entry-point
-    getBlock(total: number){
+    async getBlock(total: number) {
         // if(available < total) there should be waiting for posts to become available
-        // returns the top total IDs from the pool
+        // returns pop total IDs from the pool
     }
 }

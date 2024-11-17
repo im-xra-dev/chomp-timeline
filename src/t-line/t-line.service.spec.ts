@@ -21,15 +21,14 @@ describe('TLineService', () => {
      * TODO mutex while generating more posts prevent new generators
      *
      * pool:[{id, score, voteData, addedOn ..?}]
-     * (note addedOn tracks when a post was added to the pool, old posts are killed)
+     * (note addedOn tracks when a post was added to the pool, old posts are killed (remove from seen)
      *
-     * seen:[id]
+     * seen:{id}
      *
      * sections:[{name,score,datetime,totalInFeed}]
      * users:[{cachedUserData}]
      *
-     * heartbeat:number
-     * lastBeat:number
+     * heartbeat
      */
 
     /**mode decision module
@@ -136,6 +135,9 @@ describe('TLineService', () => {
         );
     }
 
+    //------------------------------------------------------------\\
+    // calculate post relevance
+
     it("should calculate relevance as negative because the author is muted", () => {
         const mutedUser: UserRelation = getAuthorRelation({muted: true});
         const score = relevanceTest({autRelation: mutedUser});
@@ -196,6 +198,9 @@ describe('TLineService', () => {
         expect(testScore).toBeGreaterThan(baseScore);
     })
 
+    //------------------------------------------------------------\\
+    // calculate total seen weight
+
     it("should weight posts lower if more from this category have already been shown", () => {
         const score = 100;
         const seen = 0;
@@ -212,5 +217,35 @@ describe('TLineService', () => {
         const lowScore = service.calculateTotalSeenWeight(score-1, seen);
 
         expect(highScore).toBeGreaterThan(lowScore);
+    })
+
+    //------------------------------------------------------------\\
+    // calculateSectionsToQuery
+
+    it("should return 1 section per 3 slots", () => {
+        const oneSlot = service.calculateSectionsToQuery(1, 10);
+        const threeSlot = service.calculateSectionsToQuery(3, 10);
+        const fourSlot = service.calculateSectionsToQuery(4, 10);
+
+        expect(oneSlot).toBe(1);
+        expect(threeSlot).toBe(1);
+        expect(fourSlot).toBe(2);
+    })
+
+    it("should return total sections available if calculation is too high", () => {
+        const totalAvailableSections = 1;
+        const moreThanThreeSlotsPerSection = service.calculateSectionsToQuery(totalAvailableSections*5, totalAvailableSections);
+
+        expect(moreThanThreeSlotsPerSection).toBe(totalAvailableSections);
+    })
+
+    it("should throw an error if invalid data (slots) is provided", () => {
+        const call = ()=>{service.calculateSectionsToQuery(0, 1)};
+        expect(call).toThrow();
+    })
+
+    it("should throw an error if invalid data (available) is provided", () => {
+        const call = ()=>{service.calculateSectionsToQuery(1, 0)};
+        expect(call).toThrow();
     })
 });
