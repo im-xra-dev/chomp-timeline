@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { NeoQueryService } from '../neo-query/neo-query.service';
 import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
+import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
 import {RawPost} from "../t-line/utils/types";
 
 @Injectable()
 export class PostRankerService {
     constructor(
         private readonly neoQueryService: NeoQueryService,
-        private readonly tlineCacheService: TlineCacherService
+        private readonly tlineCacheService: TlineCacherService,
+        private readonly tlineCalculatorService: TLineCalculatorService,
     ) {}
 
     rankPosts(rawPool: RawPost[]): number {
