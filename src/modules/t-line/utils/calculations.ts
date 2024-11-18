@@ -1,5 +1,5 @@
 import {PostState, UserRelation} from "./types";
-import {InvalidDataError} from './InvalidDataError'
+import {InvalidDataError} from '../../../utils/InvalidDataError'
 
 /**TODO
  * TODO  REFACTOR ALL CONSTANTS TO A CONFIG

@@ -13,6 +13,7 @@ export class PostRankerService {
     rankPosts(rawPool: RawPost[]): number {
         //data in: raw post data
         //for each post call calculateRelevanceScore; drop -ve or 0score posts then calculateTotalSeenWeight
+        //remove cached IDs (seen)
         //put in cache Q in ranked position
         //update section[x] data in state
         //return total added
@@ -24,11 +25,10 @@ export class PostRankerService {
         // x = calculateSectionsToQuery(postSlots: number, secsAvailable: number)
         //pop x sections from cache
         //query from neo || mock
-        //remove cached IDs (seen&pool)
 
         //rank posts
 
-        //splice section[x] into cache (based on sec normalized score && total seen)
+        //for each update and splice section into cache (based on sec normalized score && total seen)
     }
 
     //choose mode

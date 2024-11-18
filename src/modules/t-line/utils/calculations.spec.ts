@@ -1,6 +1,6 @@
 import {describe, expect, it} from '@jest/globals';
 import {PostState, UserRelation} from "./types";
-import {InvalidDataError} from './InvalidDataError'
+import {InvalidDataError} from '../../../utils/InvalidDataError'
 import {calculateRelevanceScore, calculateSectionsToQuery, calculateTotalSeenWeight} from './calculations'
 
 describe('timeline calculations', () => {

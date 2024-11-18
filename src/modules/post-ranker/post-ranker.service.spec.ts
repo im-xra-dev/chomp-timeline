@@ -55,17 +55,30 @@ describe('PostRankerService', () => {
           //test when 2 scores are equal
 
         });
+
+        it('should remove any posts seen in this session', () => {
+            //init / mock data
+            //call rankPosts
+            //ensure seen=true results in drop and not false
+        });
+
     });
 
     describe('queryFollowedSectionPosts', () => {
         //mock calculate secs to Q
-        //mock tlineCacheService read
+        //mock sec cache pop
+        //mock neo query
+        //mock seen cache check
+        //mock sec cache set
 
-        it('should drop negative posts', () => {
+        it('should pop the right number of posts', () => {
           //init / mock data
           //call rankPosts
-          //ensure return val is 0
-          //ensure no pooled post by this ID
+          //ensure 0, 1, 10 posts popped
+        });
+
+        it('should place secs in the correct order in the pool', () => {
+            //see above for posts
         });
     });
 });

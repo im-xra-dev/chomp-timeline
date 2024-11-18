@@ -1,5 +1,3 @@
-import {DiscoveryModes} from "./DiscoveryModes";
-
 export type UserRelation = { follows: boolean, muted: boolean, score: number }
 export type PostState = { weight: number, seen: boolean, vote: number }
 
@@ -13,7 +11,7 @@ tline:[userid]:follow:user -> id[]
 tline:[userid]:follow:user:[uid] -> hash of score, normalizedScore and totalPosts
  */
 
-export type PooledPost = {id:string, score:number, voteData:number, addedOn:number}
+// export type PooledPost = {id:string, score:number, voteData:number, addedOn:number}
 
 
 export type RawPost = {
