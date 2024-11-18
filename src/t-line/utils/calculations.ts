@@ -1,5 +1,10 @@
-import {PostState, UserRelation} from "../types";
+import {PostState, UserRelation} from "./types";
 import {InvalidDataError} from './InvalidDataError'
+
+/**TODO
+ * TODO  REFACTOR ALL CONSTANTS TO A CONFIG
+ * TODO
+ */
 
 /**Calculates relevance score for a particular post
  *
@@ -41,7 +46,7 @@ export function calculateRelevanceScore(secRelationalScore: number, postPersonal
 }
 
 //util function to boost followed members
-function conditionalWeight(bool: boolean, score: number, boost: number) {
+function conditionalWeight(bool: boolean, score: number, boost: number): number {
     if (bool) return weighted(score, boost);
     return score;
 }
@@ -49,6 +54,14 @@ function conditionalWeight(bool: boolean, score: number, boost: number) {
 //util for simple weighting of values
 function weighted(v: number, w: number): number {
     return v * w
+}
+
+/**Normalize
+ *
+ * @param score
+ */
+export function normalize(score: number): number {
+    return Math.atan(score/50);
 }
 
 /**Weights scores based on how many times this section has been shown in this session

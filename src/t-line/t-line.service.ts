@@ -1,31 +1,17 @@
 import {Injectable} from '@nestjs/common';
-import {DiscoveryModes} from './DiscoveryModes'
+import {DiscoveryModes} from './utils/DiscoveryModes'
+import {PostRankerService} from './post-ranker/post-ranker.service'
 
 @Injectable()
 export class TLineService {
 
-    rankPosts() {
-        //data in: raw post data
-        //for each post call calculateRelevanceScore; drop -ve or 0score posts then calculateTotalSeenWeight
-        //put in cache Q in ranked position && update sections cache
-    };
+    constructor(private readonly postRankerService: PostRankerService) {}
+    ping(){return "hi"}
 
     decideMode(): DiscoveryModes {
         //TODO: initial implementation will only focus on followed secs
         //decides what mode to load posts for
         return DiscoveryModes.FOLLOWED_SUBSECTION;
-    }
-
-    queryFollowedSectionPosts() {
-        // x = calculateSectionsToQuery
-        //pop x sections from cache
-        //query from neo || mock
-        //remove cached IDs (seen&pool)
-
-        //rank posts
-
-        //update section[x] data
-        //splice section[x] into cache (based on sec score && total seen)
     }
 
     getCache() {
@@ -42,8 +28,8 @@ export class TLineService {
         //adds total posts to the tline pool and seen lookup
         //these should be generated behind the scenes
 
-        //decide mode
-        //if followed sections then query followed sections
+        //decide mode(s)
+        //if followed sections then queryFollowedSectionPosts
     }
 
     //This is a client entry-point

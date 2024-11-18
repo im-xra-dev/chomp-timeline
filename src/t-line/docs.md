@@ -26,6 +26,7 @@
   /**create cache stuff
      * TODO mutex while generating more posts prevent new generators
      *
+     TODO normalize score
      * pool:[{id, score, voteData, addedOn ..?}]
      * (note addedOn tracks when a post was added to the pool, old posts are killed (remove from seen)
      *
@@ -80,6 +81,13 @@
      * (userMe)-[{score}]->(thread)
      * (userMe)-[{seen,voted}]->(post)
      *
+     notes:
+     MATCH (n:Person)
+     WITH n
+     OPTIONAL MATCH (n)-[:LIKES]-(m)
+     WITH n, m
+     OPTIONAL MATCH (n)-[:LOVES]-(t)
+     RETURN n, collect(distinct(m)) as likes, collect(distinct(t)) as loves
      */
 
     /**Math to determine whats most relevant

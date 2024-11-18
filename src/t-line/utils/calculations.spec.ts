@@ -1,5 +1,5 @@
 import {describe, expect, it} from '@jest/globals';
-import {PostState, UserRelation} from "../types";
+import {PostState, UserRelation} from "./types";
 import {InvalidDataError} from './InvalidDataError'
 import {calculateRelevanceScore, calculateSectionsToQuery, calculateTotalSeenWeight} from './calculations'
 
