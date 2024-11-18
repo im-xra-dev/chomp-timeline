@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { NeoQueryService } from '../../neo-query/neo-query.service';
+import { NeoQueryService } from '../neo-query/neo-query.service';
 import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
-import {RawPost} from "../utils/types";
+import {RawPost} from "../t-line/utils/types";
 
 @Injectable()
 export class PostRankerService {

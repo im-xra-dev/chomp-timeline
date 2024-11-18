@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TLineService } from './t-line.service';
 import { TLineController } from './t-line.controller';
-import { PostRankerModule } from './post-ranker/post-ranker.module';
+import { PostRankerModule } from '../post-ranker/post-ranker.module';
 
 @Module({
   providers: [TLineService],

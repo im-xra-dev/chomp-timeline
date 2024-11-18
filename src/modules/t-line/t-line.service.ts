@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {DiscoveryModes} from './utils/DiscoveryModes'
-import {PostRankerService} from './post-ranker/post-ranker.service'
+import {PostRankerService} from '../post-ranker/post-ranker.service'
 
 @Injectable()
 export class TLineService {
@@ -23,7 +23,7 @@ export class TLineService {
     }
 
 
-    //called internally from program and from other internal CHOMP services
+    //called internally from program and from other internal CHOMP modules
     async generateBlock(total: number) {
         //adds total posts to the tline pool and seen lookup
         //these should be generated behind the scenes
