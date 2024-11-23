@@ -10,6 +10,8 @@ export class TLineCalculatorConfigService {
        F = FUNCTION
      */
 
+    C_FOLLOW_BOOST = 1.25;
+
     SW_SEC_REL = 2;
     SW_AUTHOR_PER = 1.5;
     SW_AUTHOR_REL = 1.5;

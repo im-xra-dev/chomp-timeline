@@ -1,7 +1,7 @@
 export type UserRelation = { follows: boolean, muted: boolean, score: number }
 export type PostState = { weight: number, seen: boolean, vote: number }
 
-/*
+/* maybe userid should be tlineid
 tline:[userid]:pool -> id[]
 tline:[userid]:pool:[postid] -> hash of values
 tline:[userid]:seen -> hash or set of flags

@@ -31,7 +31,7 @@ export class TLineCalculatorService {
         if (autRelation.muted) return -1;
 
         //followed authors get a score boost
-        const authorRelationalScore = this.conditionalWeight(autRelation.follows, autRelation.score, 1.25);
+        const authorRelationalScore = this.conditionalWeight(autRelation.follows, autRelation.score, this.C.C_FOLLOW_BOOST);
 
         //calculate score
         const score =
@@ -48,17 +48,6 @@ export class TLineCalculatorService {
         //viewed posts are weighted (by how much depends on view context
         if (postState.seen) return score * postState.weight;
         return score;
-    }
-
-    //util function to boost followed members
-    conditionalWeight(bool: boolean, score: number, boost: number): number {
-        if (bool) return this.weighted(score, boost);
-        return score;
-    }
-
-    //util for simple weighting of values
-    weighted(v: number, w: number): number {
-        return v * w
     }
 
     /**Normalize
@@ -79,7 +68,6 @@ export class TLineCalculatorService {
      */
     calculateTotalSeenWeight(score: number, seen: number): number {
         if (seen < 0) throw new InvalidDataError("seen", seen);
-
         const weight = this.C.F_SEEN_WEIGHT(seen);
         return score * weight;
     }
@@ -98,7 +86,17 @@ export class TLineCalculatorService {
 
         const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
 
-        if (ideal > secsAvailable) return secsAvailable;
-        return ideal;
+        return (secsAvailable < ideal) ? secsAvailable : ideal;
+    }
+
+    //util function to boost followed members
+    conditionalWeight(bool: boolean, score: number, boost: number): number {
+        if (bool) return this.weighted(score, boost);
+        return score;
+    }
+
+    //util for simple weighting of values
+    weighted(v: number, w: number): number {
+        return v * w
     }
 }

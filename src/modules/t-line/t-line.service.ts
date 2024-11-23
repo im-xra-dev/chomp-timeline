@@ -14,10 +14,6 @@ export class TLineService {
         return DiscoveryModes.FOLLOWED_SUBSECTION;
     }
 
-    getCache() {
-        //returns current cache
-    }
-
     createCache() {
         //init new object
     }

@@ -4,13 +4,14 @@ import { getPostState, relevanceTest, getAuthorRelation } from './t-line-calcula
 import {beforeEach, describe, expect, it} from "@jest/globals";
 import {PostState, UserRelation} from "../t-line/utils/types";
 import {InvalidDataError} from "../../utils/InvalidDataError";
+import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 describe('TLineCalculatorService', () => {
   let service: TLineCalculatorService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TLineCalculatorService],
+      providers: [TLineCalculatorService, TLineCalculatorConfigService],
     }).compile();
 
     service = module.get<TLineCalculatorService>(TLineCalculatorService);
@@ -104,7 +105,7 @@ describe('TLineCalculatorService', () => {
 
     it("should throw an error if invalid data (-ve seen) is provided", () => {
       const call = () => {
-        calculateTotalSeenWeight(10, -1)
+        service.calculateTotalSeenWeight(10, -1)
       };
       expect(call).toThrow(InvalidDataError);
     })
@@ -113,9 +114,9 @@ describe('TLineCalculatorService', () => {
   //------------------------------------------------------------\\
   describe('calculate total sections to query', () => {
     it("should return 1 section per 3 slots", () => {
-      const oneSlot = calculateSectionsToQuery(1, 10);
-      const threeSlot = calculateSectionsToQuery(3, 10);
-      const fourSlot = calculateSectionsToQuery(4, 10);
+      const oneSlot = service.calculateSectionsToQuery(1, 10);
+      const threeSlot = service.calculateSectionsToQuery(3, 10);
+      const fourSlot = service.calculateSectionsToQuery(4, 10);
 
       expect(oneSlot).toBe(1);
       expect(threeSlot).toBe(1);

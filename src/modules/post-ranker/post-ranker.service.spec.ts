@@ -1,13 +1,40 @@
 import {Test, TestingModule} from '@nestjs/testing';
 import {PostRankerService} from './post-ranker.service';
 import {describe, expect, it, beforeEach} from '@jest/globals';
+import {NeoQueryService} from "../neo-query/neo-query.service";
+import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
+import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
 
 describe('PostRankerService', () => {
     let service: PostRankerService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [PostRankerService],
+            providers: [
+                PostRankerService,
+                {
+                    provide: NeoQueryService,
+                    useValue: {
+                        read: jest.fn(),
+                        write: jest.fn(),
+                    }
+                },
+                {
+                    provide: TlineCacherService,
+                    useValue: {
+                        dispatch: jest.fn(),
+                        mutex: jest.fn(),
+                    }
+                },
+                {
+                    provide: TLineCalculatorService,
+                    useValue: {
+                        calculateRelevanceScore: jest.fn(),
+                        calculateTotalSeenWeight: jest.fn(),
+                        calculateSectionsToQuery: jest.fn(),
+                    }
+                },
+            ],
         }).compile();
 
         service = module.get<PostRankerService>(PostRankerService);
@@ -23,10 +50,10 @@ describe('PostRankerService', () => {
         //mock tlineCacheService CacheState to pass to func
 
         it('should drop negative posts', () => {
-          //init / mock data
-          //call rankPosts
-          //ensure return val is 0
-          //ensure no pooled post by this ID
+            //init / mock data
+            //call rankPosts
+            //ensure return val is 0
+            //ensure no pooled post by this ID
         });
 
         it('should drop 0 score posts', () => {
@@ -44,15 +71,15 @@ describe('PostRankerService', () => {
         });
 
         it('should place posts in the correct order in the pool', () => {
-          //init / mock data
-          //call rankPosts
-          //ensure return val is 1
-          //ensure pooled post by this ID at correct index
+            //init / mock data
+            //call rankPosts
+            //ensure return val is 1
+            //ensure pooled post by this ID at correct index
 
-          //boundry data for data with close values
-          //test first place
-          //test last place
-          //test when 2 scores are equal
+            //boundry data for data with close values
+            //test first place
+            //test last place
+            //test when 2 scores are equal
 
         });
 
@@ -72,9 +99,9 @@ describe('PostRankerService', () => {
         //mock sec cache set
 
         it('should pop the right number of posts', () => {
-          //init / mock data
-          //call rankPosts
-          //ensure 0, 1, 10 posts popped
+            //init / mock data
+            //call rankPosts
+            //ensure 0, 1, 10 posts popped
         });
 
         it('should place secs in the correct order in the pool', () => {
