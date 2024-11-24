@@ -4,4 +4,5 @@ export enum DiscoveryModes {
     FOLLOWED_USER,
     RECOMMENDED_USER,
     PROMOTED,
+    RECIPES,
 }

@@ -13,9 +13,31 @@ tline:[userid]:follow:user:[uid] -> hash of score, normalizedScore and totalPost
 
 // export type PooledPost = {id:string, score:number, voteData:number, addedOn:number}
 
+export type SortedPost = {
+    id: string,
+    postState: PostState,
+    score: number,
+}
+
+export type JobListing = {
+    readonly jobid:string,
+    readonly userid:string,
+    readonly mode: DiscoveryModes,
+    readonly query: number,//how many posts from neo
+    readonly cache: number,//how many am I hoping for
+    readonly serve: number,//how many to give to the final Q
+    readonly broadcast: unknown,
+    concurrentJobs: number,
+}
 
 export type RawPost = {
-
+    id:string,
+    secRelationalScore: number,
+    postPersonalScore: number,
+    authorsPersonalScore: number,
+    thrRelationalScore: number,
+    autRelation: UserRelation,
+    postState: PostState
 }
 
 // export type DiscoverParams = { mode: DiscoveryModes, count: number };
