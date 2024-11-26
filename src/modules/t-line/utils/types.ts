@@ -15,6 +15,7 @@ tline:[userid]:follow:user:[uid] -> hash of score, normalizedScore and totalPost
 
 export type SortedPost = {
     id: string,
+    sec:string,
     postState: PostState,
     score: number,
 }
@@ -32,6 +33,7 @@ export type JobListing = {
 
 export type RawPost = {
     id:string,
+    sec:string,
     secRelationalScore: number,
     postPersonalScore: number,
     authorsPersonalScore: number,
