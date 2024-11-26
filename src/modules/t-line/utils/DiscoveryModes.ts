@@ -1,0 +1,8 @@
+export enum DiscoveryModes {
+    FOLLOWED_SUBSECTION,
+    RECOMMENDED_SUBSECTION,
+    FOLLOWED_USER,
+    RECOMMENDED_USER,
+    PROMOTED,
+    RECIPES,
+}

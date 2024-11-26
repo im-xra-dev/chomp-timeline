@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TLineService } from './t-line.service';
+import { NeoQueryService } from './neo-query.service';
 
-describe('TLineService', () => {
-  let service: TLineService;
+describe('NeoQueryService', () => {
+  let service: NeoQueryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TLineService],
+      providers: [NeoQueryService],
     }).compile();
 
-    service = module.get<TLineService>(TLineService);
+    service = module.get<NeoQueryService>(NeoQueryService);
   });
 
   it('should be defined', () => {
