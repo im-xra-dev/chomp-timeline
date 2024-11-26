@@ -13,7 +13,7 @@ export class TLineCalculatorService {
 
     /**Calculate how many section to query to build the data
      *
-     * Ideally, show 3 posts per section at a time to make timeline feel diverse
+     * Ideally, show eg 3 posts per section at a time to make timeline feel diverse
      * If there are too many slots to suit this, then all secs will be shown
      *
      * @param postSlots
@@ -28,7 +28,7 @@ export class TLineCalculatorService {
         return (secsAvailable < ideal) ? secsAvailable : ideal;
     }
 
-    /**calculateBatchCount
+    /**calculate how many batches to optimally run the calculations in
      * https://www.desmos.com/calculator/mglnoluywe
      * https://www.desmos.com/3d/alifqxuuke
      *
