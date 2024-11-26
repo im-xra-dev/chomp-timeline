@@ -4,21 +4,8 @@ import {describe, expect, it, beforeEach} from '@jest/globals';
 import {NeoQueryService} from "../neo-query/neo-query.service";
 import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
 import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
+import {TLineCalculatorConfigService} from '../../configs/t-line-calculator.config/t-line-calculator.config.service'
 import {RawPost} from "../t-line/utils/types";
-import {InvalidDataError} from "../../utils/InvalidDataError";
-
-function getRaw(): RawPost {
-    return {
-        id: "MOCK000",
-        sec: "tests",
-        authorsPersonalScore: 10,
-        postPersonalScore: 10,
-        thrRelationalScore: 10,
-        secRelationalScore: 10,
-        autRelation: {follows: false, muted: true, score: 10},
-        postState: {weight: 10, vote: 0, seen: false},
-    }
-}
 
 describe('PostRankerService', () => {
     let service: PostRankerService;
@@ -28,6 +15,8 @@ describe('PostRankerService', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 PostRankerService,
+                TLineCalculatorService,
+                TLineCalculatorConfigService,
                 {
                     provide: NeoQueryService,
                     useValue: {
@@ -40,14 +29,6 @@ describe('PostRankerService', () => {
                     useValue: {
                         dispatch: jest.fn(),
                         mutex: jest.fn(),
-                    }
-                },
-                {
-                    provide: TLineCalculatorService,
-                    useValue: {
-                        calculateRelevanceScore: jest.fn(),
-                        calculateTotalSeenWeight: jest.fn(),
-                        calculateSectionsToQuery: jest.fn(),
                     }
                 },
             ],
@@ -75,33 +56,6 @@ describe('PostRankerService', () => {
         });
     });
 
-    describe('calculateBatchCount', () => {
-        it("should be an equation that produces an optimised batch count", () => {
-            expect("the developer to have graphs that back this up").toBeTruthy()
-            // current tests for the equation outputs are in desmos and on paper [~xra 25/11/24]
-        });
-        it('should be a whole number for all outputs', () => {
-            for (let inCnt = 1; inCnt <= 100; inCnt++) {
-                for (let outCnt = 1; outCnt <= 100; outCnt++) {
-                    const out = service.calculateBatchCount(inCnt, outCnt)
-                    expect(out).toBe(Math.floor(out));
-                }
-            }
-        });
-        it('should throw an error for input size <= 0', () => {
-            const call = () => {
-                service.calculateBatchCount(0, 10)
-            };
-            expect(call).toThrow(InvalidDataError);
-        });
-        it('should throw an error for output size <= 0', () => {
-            const call = () => {
-                service.calculateBatchCount(10, 0)
-            };
-            expect(call).toThrow(InvalidDataError);
-        });
-    });
-
     describe('newBatch', () => {
         it('should return true every s numbers of an iteration', () => {
             const SIZE = 7;
@@ -124,7 +78,7 @@ describe('PostRankerService', () => {
             for (let inCnt = 1; inCnt <= 100; inCnt++) {
                 inputPosts.push(getRaw());
                 for (let outCnt = 1; outCnt <= 100; outCnt++) {
-                    const bc = service.calculateBatchCount(inCnt, outCnt);
+                    const bc = tLineCalculatorService.calculateBatchCount(inCnt, outCnt);
                     const jobBuilder = service.dispatchConcurrentPosts(inputPosts, outCnt, 0)
                     expect(jobBuilder.length).toBe(bc);
                 }
@@ -149,9 +103,9 @@ describe('PostRankerService', () => {
             const mock = jest.fn((a, b) => a.length);
             jest.spyOn(service, 'batchCalculate').mockImplementation(mock);
 
-            const outCnt = 47; // inits
+            const outCnt = 47; // init
             const inCnt = 777;
-            const bc = service.calculateBatchCount(inCnt, outCnt);
+            const bc = tLineCalculatorService.calculateBatchCount(inCnt, outCnt);
             const actualBatchSize = Math.floor(inCnt / bc);
 
             const inputPosts: RawPost[] = []; //generate mock data and run
@@ -171,3 +125,16 @@ describe('PostRankerService', () => {
         })
     });
 });
+
+function getRaw(): RawPost {
+    return {
+        id: "MOCK000",
+        sec: "tests",
+        authorsPersonalScore: 10,
+        postPersonalScore: 10,
+        thrRelationalScore: 10,
+        secRelationalScore: 10,
+        autRelation: {follows: false, muted: true, score: 10},
+        postState: {weight: 10, vote: 0, seen: false},
+    }
+}

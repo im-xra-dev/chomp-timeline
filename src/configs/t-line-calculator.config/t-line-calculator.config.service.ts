@@ -25,4 +25,10 @@ export class TLineCalculatorConfigService {
 
     // desmos code y=\frac{1}{x+4}\ +\ 0.75
     F_SEEN_WEIGHT = (x) => (1 / (x + 4)) + 0.75
+
+    // * https://www.desmos.com/calculator/mglnoluywe
+    // * https://www.desmos.com/3d/alifqxuuke
+    //min-point on curve is at idealBatchSize = sqrt(2c)
+    F_BATCH_SIZE_MIN_POINT = (c) => Math.sqrt(2 * c)
+    F_IDEAL_BATCH_COUNT = (n, c) => n / this.F_BATCH_SIZE_MIN_POINT(c)
 }

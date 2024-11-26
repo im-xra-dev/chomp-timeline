@@ -11,6 +11,62 @@ export class TLineCalculatorService {
     ) {
     }
 
+    /**Calculate how many section to query to build the data
+     *
+     * Ideally, show 3 posts per section at a time to make timeline feel diverse
+     * If there are too many slots to suit this, then all secs will be shown
+     *
+     * @param postSlots
+     * @param secsAvailable
+     */
+    calculateSectionsToQuery(postSlots: number, secsAvailable: number): number {
+        if (postSlots <= 0) throw new InvalidDataError("postSlots", postSlots);
+        if (secsAvailable <= 0) throw new InvalidDataError("secsAvailable", secsAvailable);
+
+        const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
+
+        return (secsAvailable < ideal) ? secsAvailable : ideal;
+    }
+
+    /**calculateBatchCount
+     * https://www.desmos.com/calculator/mglnoluywe
+     * https://www.desmos.com/3d/alifqxuuke
+     *
+     * the time complexity graph for
+     * y - total operations
+     * x / n - input size
+     * c - output size
+     * i - batch size
+     *
+     * with
+     * b - batch count = n / i
+     *
+     * graph of y = b(c+z) {1 <= b <= n} gives total operations at a given b (batch count)
+     *   where z = (i(i + 1)) / 2
+     *   is equation of the total operations per batch of size {1 <= i <= n}
+     * has a min point that lies on y = (n/i) (( (i(i+1)) / 2 ) + c)
+     *
+     * min point lies on i = sqrt(2c)  for all values of c
+     *
+     * This simplifies to the 3-D graph of min-points for a given c,n input
+     * y = (n/sqrt(2c))(c+((sqrt(2c))((sqrt(2c)) + 1)) / 2)
+     **
+     * @param inputSize
+     * @param outputSize
+     */
+    calculateBatchCount(inputSize: number, outputSize: number): number {
+        if (inputSize <= 0)
+            throw new InvalidDataError('calculateBatchCount > inputSize', 'must be > 0')
+
+        if (outputSize <= 0)
+            throw new InvalidDataError('calculateBatchCount > outputSize', 'must be > 0')
+
+        //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
+        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
+        const batchCount = Math.ceil(idealBatchCount);
+        return batchCount;
+    }
+
     /**Calculates relevance score for a particular post
      *
      * Relational Score - a score based on the relation between the requesting user and the specified node
@@ -50,14 +106,6 @@ export class TLineCalculatorService {
         return score;
     }
 
-    /**Normalize
-     *
-     * @param score
-     */
-    normalize(score: number): number {
-        return Math.atan(score / this.C.C_ATAN_DIVISOR);
-    }
-
     /**Weights scores based on how many times this section has been shown in this session
      *
      * as seen from 0 -> ...
@@ -72,24 +120,12 @@ export class TLineCalculatorService {
         return score * weight;
     }
 
-    /**Calculate how many section to query to build the data
-     *
-     * Ideally, show 3 posts per section at a time to make timeline feel diverse
-     * If there are too many slots to suit this, then all secs will be shown
-     *
-     * @param postSlots
-     * @param secsAvailable
-     */
-    calculateSectionsToQuery(postSlots: number, secsAvailable: number): number {
-        if (postSlots <= 0) throw new InvalidDataError("postSlots", postSlots);
-        if (secsAvailable <= 0) throw new InvalidDataError("secsAvailable", secsAvailable);
-
-        const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
-
-        return (secsAvailable < ideal) ? secsAvailable : ideal;
+    //util to normalize
+    normalize(score: number): number {
+        return Math.atan(score / this.C.C_ATAN_DIVISOR);
     }
 
-    //util function to boost followed members
+    //util to boost followed members
     conditionalWeight(bool: boolean, score: number, boost: number): number {
         if (bool) return this.weighted(score, boost);
         return score;
@@ -99,4 +135,6 @@ export class TLineCalculatorService {
     weighted(v: number, w: number): number {
         return v * w
     }
+
+
 }

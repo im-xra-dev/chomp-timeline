@@ -17,47 +17,6 @@ export class PostRankerService {
     ) {
     }
 
-    //todo refactor to calculator service
-    /**calculateBatchCount
-     * https://www.desmos.com/calculator/mglnoluywe
-     * https://www.desmos.com/3d/alifqxuuke
-     *
-     * the time complexity graph for
-     * y - total operations
-     * x / n - input size
-     * c - output size
-     * i - batch size
-     *
-     * with
-     * b - batch count = n / i
-     *
-     * graph of y = b(c+z) {1 <= b <= n} gives total operations at a given b (batch count)
-     *   where z = (i(i + 1)) / 2
-     *   is equation of the total operations per batch of size {1 <= i <= n}
-     * has a min point that lies on y = (n/i) (( (i(i+1)) / 2 ) + c)
-     *
-     * min point lies on i = sqrt(2c)  for all values of c
-     *
-     * This simplifies to the 3-D graph of min-points for a given c,n input
-     * y = (n/sqrt(2c))(c+((sqrt(2c))((sqrt(2c)) + 1)) / 2)
-     **
-     * @param inputSize
-     * @param outputSize
-     */
-    calculateBatchCount(inputSize: number, outputSize: number): number {
-        if (inputSize <= 0)
-            throw new InvalidDataError('calculateBatchCount > inputSize', 'must be > 0')
-
-        if (outputSize <= 0)
-            throw new InvalidDataError('calculateBatchCount > outputSize', 'must be > 0')
-
-        //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
-        const idealBatchSize = Math.sqrt(2 * outputSize);
-        const batchCount = Math.ceil(inputSize / idealBatchSize);
-        return batchCount;
-    }
-
-
     /**dispatchConcurrentPosts o(n)
      *
      * iterate over raw pool and dispatch all posts in batches
@@ -72,7 +31,7 @@ export class PostRankerService {
     dispatchConcurrentPosts(rawPool: RawPost[], outSize: number, minScore: number): ConcurrentBatch[] {
         const jobBuilder: ConcurrentBatch[] = [];
         const inSize = rawPool.length;
-        const bc = this.calculateBatchCount(inSize, outSize);
+        const bc = this.tlineCalculatorService.calculateBatchCount(inSize, outSize);
         const actualBatchSize = Math.floor(inSize / bc);
         const notLeftovers = bc * actualBatchSize;
 
@@ -108,13 +67,6 @@ export class PostRankerService {
         //  sortedData = sortingData
         //  sortingData = []
         return sortedData;
-    }
-
-    //utility functions
-
-    //return true every s iterations to break up data
-    newBatch (i: number, s: number): boolean {
-        return (i + 1) % s === 0;
     }
 
     // n = number of posts found
@@ -158,49 +110,10 @@ export class PostRankerService {
 
     }
 
-    async rankPosts(job: JobListing): Promise<number> {
-        //data in: raw post data
+    //utility functions
 
-
-        // const cached = []; // precache for this job|user|mode
-        // const sortedBatches = SortedPost[][]
-        // const concurrentJobs = Promise<SortedPost[]>[]
-        //
-
-
-        //for top cachesize      //   set seen true
-        //for any dropped from original cachesize //set seen false && sec total -- && clear postid's cache data
-
-
-        //TODO: seperate out but this will insert into active tline
-        //CACHE2 get cached users pool.  pop job.serve and push to live pool (O(n) // O(job.serve * 2))
-        // these are the posts that get broadcast so that their content can be cached
-
-        //return total added
-        return 0;
-    };
-
-
-
-    async queryFollowedSectionPosts(postSlots: number) {
-        //const secsAvaialab
-        // x = calculateSectionsToQuery(postSlots: number, secsAvailable: number)
-        //pop x sections from cache
-        //query from neo || mock
-
-        //rank posts (concurrent batch count set)
-
-        //for each update and splice section into cache (based on sec normalized score && total seen)
+    //return true every s iterations to break up data
+    newBatch (i: number, s: number): boolean {
+        return (i + 1) % s === 0;
     }
-
-    //choose mode
-    // x = calculateSectionsToQuery
-    // pop top x
-    // query
-    //  remove seen
-    //  calculate post score
-    //  drop -ve, splice&seen +ve
-    // update tobj attribs?
-    // splice tobj based on calculateTotalSeenWeight(normalized, total seen)
-
 }
