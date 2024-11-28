@@ -8,19 +8,23 @@ export class PostRankerManagerService {
     async rankPosts(job: JobListing): Promise<number> {
         //data in: raw post data
 
+        // const startCache = []; // precache for this job|user|mode
+        //job description
 
-        // const cached = []; // precache for this job|user|mode
-        // const sortedBatches = SortedPost[][]
-        // const concurrentJobs = Promise<SortedPost[]>[]
-        //
+        // queryFollowedSectionPosts
+        // job = dispatchConcurrentPosts;
+        // output = await jobRunner
 
-
-        //for top cachesize      //   set seen true
-        //for any dropped from original cachesize //set seen false && sec total -- && clear postid's cache data
+        // c = cachesize
+        //const newMin = output[c] score
+        //for startCache[c->0]
+        //   if get(score) < newMin:
+        //      set seen false && sec total -- && clear attrs
+        //   else break;
 
 
         //TODO: seperate out but this will insert into active tline
-        //CACHE2 get cached users pool.  pop job.serve and push to live pool (O(n) // O(job.serve * 2))
+        // push to users pool.  pop job.serve and push to live pool (O(n) // O(job.serve * 2))
         // these are the posts that get broadcast so that their content can be cached
 
         //return total added

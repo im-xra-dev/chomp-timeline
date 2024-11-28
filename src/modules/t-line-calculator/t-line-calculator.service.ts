@@ -30,7 +30,7 @@ export class TLineCalculatorService {
 
     /**calculate how many batches to optimally run the calculations in
      * https://www.desmos.com/calculator/mglnoluywe
-     * https://www.desmos.com/3d/alifqxuuke
+     * https://www.desmos.com/3d/krga16rwe4
      *
      * the time complexity graph for
      * y - total operations
