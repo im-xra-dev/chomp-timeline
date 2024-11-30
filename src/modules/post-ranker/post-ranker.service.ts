@@ -1,18 +1,13 @@
 import {Injectable} from '@nestjs/common';
-import {NeoQueryService} from '../neo-query/neo-query.service';
-import {TlineCacherService} from '../tline-cacher/tline-cacher.service';
 import {TLineCalculatorService} from '../t-line-calculator/t-line-calculator.service';
-import {RawPost} from "../t-line/utils/types";
-import {JobListing, SortedPost} from "../t-line/utils/types"
-import {InvalidDataError} from "../../utils/InvalidDataError";
+import {BatchCalculatorService} from '../batch-calculator/batch-calculator.service';
+import {JobListing, RawPost, SortedPost, ConcurrentBatch} from "../t-line/utils/types";
 
-type ConcurrentBatch = Promise<SortedPost[]>
 
 @Injectable()
 export class PostRankerService {
     constructor(
-        private readonly neoQueryService: NeoQueryService,
-        private readonly tlineCacheService: TlineCacherService,
+        private readonly batchCalculatorService: BatchCalculatorService,
         private readonly tlineCalculatorService: TLineCalculatorService,
     ) {
     }
@@ -25,7 +20,7 @@ export class PostRankerService {
      * then it is more efficient to even out across the batches
      *
      * @param rawPool
-     * @param job
+     * @param outSize
      * @param minScore
      */
     dispatchConcurrentPosts(rawPool: RawPost[], outSize: number, minScore: number): ConcurrentBatch[] {
@@ -35,39 +30,25 @@ export class PostRankerService {
         const actualBatchSize = Math.floor(inSize / bc);
         const notLeftovers = bc * actualBatchSize;
 
-        //handles unevenly filled batches
-        let leftover = inSize - notLeftovers;
+        let leftoverCounter = inSize - notLeftovers; //handles unevenly filled batches
         let jobBatch: RawPost[] = [];
+
         for (let i = 0; i < notLeftovers; i++) {
             jobBatch.push(rawPool[i]);//dispatch post
 
             if (this.newBatch(i, actualBatchSize)) {
-                if (leftover > 0){ //dispatch overflow post
-                    jobBatch.push(rawPool[inSize - leftover]);
-                    leftover --;
+                if (leftoverCounter > 0) { //dispatch overflow post
+                    jobBatch.push(rawPool[inSize - leftoverCounter]);
+                    leftoverCounter--;
                 }
                 //dispatch this batch and start next one
-                jobBuilder.push(this.batchCalculate(jobBatch, minScore));
+                jobBuilder.push(this.batchCalculatorService.batchCalculate(jobBatch, minScore));
                 jobBatch = [];
             }
         }
         return jobBuilder;
     }
 
-    //O(n^2); run concurrently in batches add warning about time complexity graph
-    async batchCalculate(batch: RawPost[], minScore: number): Promise<SortedPost[]> {
-        let sortedData: SortedPost[] = [];
-        let sortingData: SortedPost[] = [];
-        //for each post in batch
-        //  call calculateRelevanceScore;
-        //  drop -ve or 0score posts
-        //  drop posts less than minScore
-        //  for sortedData
-        //    pop and push to sorting, adding current post
-        //  sortedData = sortingData
-        //  sortingData = []
-        return sortedData;
-    }
 
     // n = number of posts found
     // c = specified cache size (constant)
@@ -81,7 +62,7 @@ export class PostRankerService {
     //worst no-action case iterates o(rb) == o(n) -- already all seen (for each batch; discard all b posts)
     //best re-order case iterates o(rc) == o(fn) -> o(n) -- none discarded, each batch (r) iterates over top [c] elements
     //worst re-order case iterates o(rb+rc)) == o(n + fn) == o((f+1)n) -> o(n) -- one in each batch kept; all others discarded. each batch iterates over b (posts) + c
-    async jobRunner(job: JobListing, batchRunners: ConcurrentBatch[]) {
+    async jobRunner(job: JobListing, batchRunners: ConcurrentBatch[]): Promise<SortedPost[]> {
         // for each concurrent job
         //   sortedB = await concurrentJobs[i]
         //   sortedC = currentCache of length <= job.cache
@@ -94,7 +75,7 @@ export class PostRankerService {
         //     if b < length of sortedB
         //       sB_elm = sortedB[b]
         //       if (seen sB_elm) b++; discard++; continue;
-        //       wB = calculateTotalSeenWeight
+        //       wB = sB_elm weight
         //     else wB = -2
         //
         //     if first valid post is worse than worst in C then its already ordered
@@ -104,16 +85,17 @@ export class PostRankerService {
         //       wC = getWeight(sC_id);
         //       if (wC > wB) c++; sortingBC.push(sC_id); continue?
         //       b++; sortingBC.push(sB_elm.id)
+        //       set:  seen && attrs && sec total ++
         //       CACHE1 update section totalPosts data in :sec:[secid] ++
         //       CACHE1 update seen wB, sec, state etc
         //       break
-
+        return [];
     }
 
     //utility functions
 
     //return true every s iterations to break up data
-    newBatch (i: number, s: number): boolean {
+    newBatch(i: number, s: number): boolean {
         return (i + 1) % s === 0;
     }
 }

@@ -1,3 +1,6 @@
+const DiscoveryModes = import('../utils/DiscoveryModes')
+
+
 export type UserRelation = { follows: boolean, muted: boolean, score: number }
 export type PostState = { weight: number, seen: boolean, vote: number }
 
@@ -15,15 +18,18 @@ tline:[userid]:follow:user:[uid] -> hash of score, normalizedScore and totalPost
 
 export type SortedPost = {
     id: string,
-    sec:string,
-    postState: PostState,
+    sec: string,
+    seen: boolean,
+    vote: number,
     score: number,
 }
 
+export type ConcurrentBatch = Promise<SortedPost[]>
+
 export type JobListing = {
-    readonly jobid:string,
-    readonly userid:string,
-    readonly mode: DiscoveryModes,
+    readonly jobid: string,
+    readonly userid: string,
+    readonly mode: keyof typeof DiscoveryModes,
     readonly query: number,//how many posts from neo
     readonly cache: number,//how many am I hoping for
     readonly serve: number,//how many to give to the final Q
@@ -32,8 +38,8 @@ export type JobListing = {
 }
 
 export type RawPost = {
-    id:string,
-    sec:string,
+    id: string,
+    sec: string,
     secRelationalScore: number,
     postPersonalScore: number,
     authorsPersonalScore: number,
