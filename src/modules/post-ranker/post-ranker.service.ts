@@ -1,18 +1,13 @@
 import {Injectable} from '@nestjs/common';
-import {NeoQueryService} from '../neo-query/neo-query.service';
-import {TlineCacherService} from '../tline-cacher/tline-cacher.service';
 import {TLineCalculatorService} from '../t-line-calculator/t-line-calculator.service';
-import {JobListing, RawPost, SortedPost} from "../t-line/utils/types";
-import {InvalidDataError} from "../../utils/InvalidDataError";
-import {TLineCacheQueriesEnum} from "../../utils/TLineCacheQueriesEnum";
+import {BatchCalculatorService} from '../batch-calculator/batch-calculator.service';
+import {JobListing, RawPost, SortedPost, ConcurrentBatch} from "../t-line/utils/types";
 
-type ConcurrentBatch = Promise<SortedPost[]>
 
 @Injectable()
 export class PostRankerService {
     constructor(
-        private readonly neoQueryService: NeoQueryService,
-        private readonly tlineCacheService: TlineCacherService,
+        private readonly batchCalculatorService: BatchCalculatorService,
         private readonly tlineCalculatorService: TLineCalculatorService,
     ) {
     }
@@ -25,7 +20,7 @@ export class PostRankerService {
      * then it is more efficient to even out across the batches
      *
      * @param rawPool
-     * @param job
+     * @param outSize
      * @param minScore
      */
     dispatchConcurrentPosts(rawPool: RawPost[], outSize: number, minScore: number): ConcurrentBatch[] {
@@ -47,83 +42,12 @@ export class PostRankerService {
                     leftoverCounter--;
                 }
                 //dispatch this batch and start next one
-                jobBuilder.push(this.batchCalculate(jobBatch, minScore));
+                jobBuilder.push(this.batchCalculatorService.batchCalculate(jobBatch, minScore));
                 jobBatch = [];
             }
         }
         return jobBuilder;
     }
-
-    //O(n^2); run concurrently in batches add warning about time complexity graph
-    async batchCalculate(batch: RawPost[], minScore: number): Promise<SortedPost[]> {
-        if (minScore < 0) throw new InvalidDataError('batchCalculate > minScore', 'must be >= 0')
-        if (batch.length === 0) return [];
-
-        const seenData: { [key: string]: number } = {};
-        let sortedData: SortedPost[] = [];
-
-        for (let bI = 0; bI < batch.length; bI++) {
-            const P = batch[bI]; // calculate raw score
-            const rawScore = this.tlineCalculatorService.calculateRelevanceScore(
-                P.secRelationalScore, P.postPersonalScore, P.authorsPersonalScore,
-                P.thrRelationalScore, P.autRelation, P.postState);
-            if (rawScore <= minScore) continue; //reject post
-
-            const sec = P.sec; // calculate weighted score
-            const seen: number = await this.getCachedSeenCount(sec, seenData);
-            const weightScore = this.tlineCalculatorService.calculateTotalSeenWeight(rawScore, seen);
-            if (weightScore <= minScore) continue; //reject post
-
-            //sort the post
-            const postBeingSorted = {score: weightScore, id: P.id, postState: P.postState, sec: P.sec};
-            sortedData = this.sort(sortedData, postBeingSorted);
-            seenData[sec]++;
-        }
-
-        return sortedData;
-    }
-
-    //util to interface with the cache
-    async getCachedSeenCount(sec: string, seenData: { [key: string]: number }): Promise<number> {
-        if (seenData[sec] !== undefined) return seenData[sec];
-
-        const seenCount: unknown = await this.tlineCacheService.dispatch(TLineCacheQueriesEnum.GET_SEEN, {sec});
-        if (seenCount === undefined) seenData[sec] = 0;
-        else seenData[sec] = seenCount as number;
-
-        return seenData[sec];
-    }
-
-    //util to sort an individual post in to the sorted array O(n)
-    sort(sortedInput: SortedPost[], postBeingSorted: SortedPost): SortedPost[] {
-        if (sortedInput.length === 0)
-            return [postBeingSorted]; //first element already sorted
-        const sortingWeight = postBeingSorted.score;
-
-        //if new is smallest, push for O(1)
-        if (sortedInput[sortedInput.length - 1].score >= sortingWeight) {
-            sortedInput.push(postBeingSorted);
-            return sortedInput;
-        }
-
-        //sort data
-        const sortingOutput: SortedPost[] = [];
-        const consumedCount = this.consumePosts(sortingWeight, 0, sortedInput, sortingOutput);
-        sortingOutput.push(postBeingSorted);
-        this.consumePosts(0, consumedCount, sortedInput, sortingOutput);
-
-        return sortingOutput;
-    }
-
-    //util moves sorted posts to sorting array until it reaches the breakScore
-    consumePosts = (breakScore: number, consumedCount: number, sortedInput: SortedPost[], sortingOutput: SortedPost[]): number => {
-        while (consumedCount < sortedInput.length) {
-            if (sortedInput[consumedCount].score < breakScore) break;
-            sortingOutput.push(sortedInput[consumedCount]);
-            consumedCount++;
-        }
-        return consumedCount
-    };
 
 
     // n = number of posts found

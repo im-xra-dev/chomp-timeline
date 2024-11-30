@@ -39,17 +39,17 @@ export class TLineCalculatorService {
      * i - batch size
      *
      * with
-     * b - batch count = n / i
+     * b = batch count = n / i
      *
      * graph of y = b(c+z) {1 <= b <= n} gives total operations at a given b (batch count)
-     *   where z = (i(i + 1)) / 2
+     *   where z = (i(i + 1)) / 2 (big o of the sorting algorithm)
      *   is equation of the total operations per batch of size {1 <= i <= n}
      * has a min point that lies on y = (n/i) (( (i(i+1)) / 2 ) + c)
      *
      * min point lies on i = sqrt(2c)  for all values of c
      *
      * This simplifies to the 3-D graph of min-points for a given c,n input
-     * y = (n/sqrt(2c))(c+((sqrt(2c))((sqrt(2c)) + 1)) / 2)
+     * y = (sqrt(2c)+0.5) * n
      **
      * @param inputSize
      * @param outputSize
