@@ -15,7 +15,8 @@ export class BatchCalculatorService {
 
     /**Calculates and ranks a batch of posts
      *
-     * O(n^2) for limited size of n
+     * Worst case: O(n^2) for limited size of n
+     * best case: O(n) if data is already sorted, or all posts are rejected
      * This runs concurrently to rank all the posts
      *
      * @param batch
@@ -55,7 +56,8 @@ export class BatchCalculatorService {
     }
 
     //util: interfaces with the caches to figure out how many posts from 'sec' have been marked as seen
-    // it first checks its local cache in seenDataRef. if it does not exist, it writes
+    // it first checks its local cache in seenDataRef.
+    // if it does not exist locally, it queries from redis and writes it into the local cache (default to 0 if not found)
     async getCachedSeenCount(sec: string, seenDataRef: { [key: string]: number }): Promise<number> {
         //return locally cached value if it exists
         if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
@@ -75,7 +77,8 @@ export class BatchCalculatorService {
     }
 
     //util: sorts an individual post in to the already sorted array
-    // worst case: O(n)
+    // worst case: O(n) if postToInsert has largest score
+    // best case: O(1) if postToInsert has lowest score
     sortHighToLow(sortedInput: SortedPost[], postToInsert: SortedPost): void {
         //start at the end and shift each item over by 1
         // when it finds where the new item should go, insert it and ignore the rest (as theryre already sorted)

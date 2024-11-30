@@ -11,7 +11,6 @@ import {BatchCalculatorService} from "../batch-calculator/batch-calculator.servi
 describe('PostRankerService', () => {
     let service: PostRankerService;
     let tLineCalculatorService: TLineCalculatorService;
-    let tlineCacherService: TlineCacherService;
     let batchCalculatorService: BatchCalculatorService;
 
     beforeEach(async () => {
@@ -38,7 +37,6 @@ describe('PostRankerService', () => {
 
         service = module.get<PostRankerService>(PostRankerService);
         tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
-        tlineCacherService = module.get<TlineCacherService>(TlineCacherService);
         batchCalculatorService = module.get<BatchCalculatorService>(BatchCalculatorService);
     });
 
