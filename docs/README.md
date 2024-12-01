@@ -6,13 +6,13 @@
 - The server is written in nest/TS
 - testing is performed with JEST
 
-##Time complexity
+## Time complexity
 [Read about the time complexity](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/time-complexity.md)
 
-##Caching
+## Caching
 [Read about the caching](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/caching.md)
 
-##Jobs
+## Jobs
 [Read about the event jobs listened for](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/job-types.md)
 
 ## Data flow
