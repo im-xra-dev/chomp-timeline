@@ -23,7 +23,7 @@ export class BatchCalculatorService {
      * @param rejectScore
      */
     async batchCalculate(batch: RawPost[], rejectScore: number): Promise<SortedPost[]> {
-        strictEqual(rejectScore >= 0, true, 'batchCalculate -> minScore must be >= 0');
+        strictEqual(rejectScore >= 0, true, 'batchCalculate -> rejectScore must be >= 0');
 
         //The batch size should never be 0 so long as the total batches is <= total inputs
         //though this case should never occur, returning an empty array provides an elegant failsafe
