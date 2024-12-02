@@ -3,6 +3,12 @@
 import {PostState, UserRelation} from "../t-line/utils/types";
 import {TLineCalculatorService} from '../t-line-calculator/t-line-calculator.service';
 
+/**test utility to provide default values for the attributes not being tested
+ *
+ * @param follows
+ * @param muted
+ * @param score
+ */
 export function getAuthorRelation(
     {
         follows = false,
@@ -17,6 +23,12 @@ export function getAuthorRelation(
     return {follows, muted, score};
 }
 
+/**test utility to provide default values for the attributes not being tested
+ *
+ * @param seen
+ * @param weight
+ * @param vote
+ */
 export function getPostState(
     {
         seen = false,
@@ -31,6 +43,18 @@ export function getPostState(
     return {seen, weight, vote};
 }
 
+/**test utility to provide default values for the attributes not being tested
+ *
+ * This function runs test on the relevance score module
+ *
+ * @param service
+ * @param secScore
+ * @param postScore
+ * @param autScore
+ * @param thrScore
+ * @param autRelation
+ * @param postState
+ */
 export function relevanceTest(
     service: TLineCalculatorService,
     {

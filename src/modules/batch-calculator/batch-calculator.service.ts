@@ -20,10 +20,13 @@ export class BatchCalculatorService {
      * This runs concurrently to rank all the posts
      *
      * @param batch
-     * @param minScore
+     * @param rejectScore
      */
-    async batchCalculate(batch: RawPost[], minScore: number): Promise<SortedPost[]> {
-        strictEqual(minScore >= 0, true, 'batchCalculate -> minScore must be >= 0');
+    async batchCalculate(batch: RawPost[], rejectScore: number): Promise<SortedPost[]> {
+        strictEqual(rejectScore >= 0, true, 'batchCalculate -> minScore must be >= 0');
+
+        //The batch size should never be 0 so long as the total batches is <= total inputs
+        //though this case should never occur, returning an empty array provides an elegant failsafe
         if (batch.length === 0) return [];
 
         const seenDataLocalCache: { [key: string]: number } = {};
@@ -37,14 +40,14 @@ export class BatchCalculatorService {
             const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
                 P.secRelationalScore, P.postPersonalScore, P.authorsPersonalScore,
                 P.thrRelationalScore, P.autRelation, P.postState);
-            if (rawScore <= minScore) continue; //reject post
+            if (rawScore <= rejectScore) continue; //reject post
 
-            const sec: string = P.sec;
+            const sec = P.sec;
             //calculate the weighted score based on how many have been seen from this category
             //this is to create variation in the feed so the same category doesnt come up many times in a row
             const seen: number = await this.getCachedSeenCount(sec, seenDataLocalCache);
             const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(rawScore, seen);
-            if (weightScore <= minScore) continue; //reject post
+            if (weightScore <= rejectScore) continue; //reject post
 
             //sort the un-rejected post
             this.sortHighToLow(sortedData,
@@ -62,14 +65,16 @@ export class BatchCalculatorService {
         //return locally cached value if it exists
         if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
 
-        //set the local cache value by moving the redis cached value to local cache (defaults to 0 if not exists)
         try {
+            //set the local cache value by moving the redis cached value to local cache (defaults to 0 if not exists)
             const seenCount: unknown = await this.tlineCacheService.dispatch(TLineCacheQueriesEnum.GET_SEEN, {sec});
             if (seenCount === undefined) seenDataRef[sec] = 0;
             else seenDataRef[sec] = seenCount as number;
 
             return seenDataRef[sec];
         } catch (e) {
+            //Failsafe with no data seen, though this error should be looked into
+            //as it could indicate an issue with redis or a networking outage
             console.error(e);
             seenDataRef[sec] = 0;
             return 0;

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TLineService } from './t-line.service';
 import { TLineController } from './t-line.controller';
-import { PostRankerModule } from '../post-ranker/post-ranker.module';
+import { DispatcherModule } from '../dispatcher/dispatcher.module';
 
 @Module({
   providers: [TLineService],
   controllers: [TLineController],
-  imports: [PostRankerModule]
+  imports: [DispatcherModule]
 })
 export class TLineModule {}
