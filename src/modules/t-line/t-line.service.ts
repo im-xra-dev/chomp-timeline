@@ -1,11 +1,11 @@
 import {Injectable} from '@nestjs/common';
 import {DiscoveryModes} from './utils/DiscoveryModes'
-import {PostRankerService} from '../post-ranker/post-ranker.service'
+import {DispatcherService} from '../dispatcher/dispatcher.service'
 
 @Injectable()
 export class TLineService {
 
-    constructor(private readonly postRankerService: PostRankerService) {}
+    constructor(private readonly postRankerService: DispatcherService) {}
     ping(){return "hi"}
 
     decideMode(): DiscoveryModes {

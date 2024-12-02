@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PostRankerService } from './post-ranker.service';
+import { DispatcherService } from './dispatcher.service';
 import { TLineCalculatorModule } from '../t-line-calculator/t-line-calculator.module';
 import {BatchCalculatorModule} from "../batch-calculator/batch-calculator.module";
 
 @Module({
-  providers: [PostRankerService],
-  exports: [PostRankerService],
+  providers: [DispatcherService],
+  exports: [DispatcherService],
   imports: [BatchCalculatorModule, TLineCalculatorModule]
 })
-export class PostRankerModule {}
+export class DispatcherModule {}

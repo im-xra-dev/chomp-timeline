@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
+import {strictEqual} from 'assert'
 import {PostState, UserRelation} from "../t-line/utils/types";
-import {InvalidDataError} from "../../utils/InvalidDataError";
 import {TLineCalculatorConfigService} from "../../configs/t-line-calculator.config/t-line-calculator.config.service";
 
 @Injectable()
@@ -20,8 +20,10 @@ export class TLineCalculatorService {
      * @param secsAvailable
      */
     calculateSectionsToQuery(postSlots: number, secsAvailable: number): number {
-        if (postSlots <= 0) throw new InvalidDataError("postSlots", postSlots);
-        if (secsAvailable <= 0) throw new InvalidDataError("secsAvailable", secsAvailable);
+        strictEqual(postSlots <= 0, false,
+            'calculateSectionsToQuery -> postSlots must be > 0');
+        strictEqual(secsAvailable <= 0, false,
+            'calculateSectionsToQuery -> secsAvailable must be > 0');
 
         const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
 
@@ -55,11 +57,10 @@ export class TLineCalculatorService {
      * @param outputSize
      */
     calculateBatchCount(inputSize: number, outputSize: number): number {
-        if (inputSize <= 0)
-            throw new InvalidDataError('calculateBatchCount > inputSize', 'must be > 0')
-
-        if (outputSize <= 0)
-            throw new InvalidDataError('calculateBatchCount > outputSize', 'must be > 0')
+        strictEqual(inputSize <= 0, false,
+            'calculateBatchCount -> inputSize must be > 0');
+        strictEqual(outputSize <= 0, false,
+            'calculateBatchCount -> outputSize must be > 0');
 
         //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
         const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
@@ -89,7 +90,7 @@ export class TLineCalculatorService {
         //followed authors get a score boost
         const authorRelationalScore = this.conditionalWeight(autRelation.follows, autRelation.score, this.C.C_FOLLOW_BOOST);
 
-        //calculate score
+        //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score =
             this.weighted(
                 this.weighted(secRelationalScore, this.C.SW_SEC_REL)
@@ -115,7 +116,9 @@ export class TLineCalculatorService {
      * @param seen
      */
     calculateTotalSeenWeight(score: number, seen: number): number {
-        if (seen < 0) throw new InvalidDataError("seen", seen);
+        strictEqual(seen < 0, false,
+            'calculateTotalSeenWeight -> seen must be > 0');
+
         const weight = this.C.F_SEEN_WEIGHT(seen);
         return score * weight;
     }
@@ -135,6 +138,5 @@ export class TLineCalculatorService {
     weighted(v: number, w: number): number {
         return v * w
     }
-
 
 }
