@@ -1,6 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {strictEqual} from 'assert'
-import {PostState, UserRelation} from "../t-line/utils/types";
+import {PostState, UserRelation} from "../../utils/types";
 import {TLineCalculatorConfigService} from "../../configs/t-line-calculator.config/t-line-calculator.config.service";
 
 @Injectable()

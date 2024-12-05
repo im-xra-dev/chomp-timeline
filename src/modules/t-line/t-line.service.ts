@@ -1,5 +1,5 @@
 import {Injectable} from '@nestjs/common';
-import {DiscoveryModes} from './utils/DiscoveryModes'
+import {DiscoveryModes} from '../../utils/DiscoveryModes'
 import {DispatcherService} from '../dispatcher/dispatcher.service'
 
 @Injectable()
