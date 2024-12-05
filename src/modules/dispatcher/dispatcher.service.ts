@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {TLineCalculatorService} from '../t-line-calculator/t-line-calculator.service';
 import {BatchCalculatorService} from '../batch-calculator/batch-calculator.service';
-import {RawPost, ConcurrentBatch} from "../t-line/utils/types";
+import {RawPost, ConcurrentBatch} from "../../utils/types";
 import {strictEqual} from "assert";
 
 

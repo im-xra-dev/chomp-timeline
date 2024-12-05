@@ -5,7 +5,7 @@ import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.ser
 import {TLineCalculatorConfigService} from "../../configs/t-line-calculator.config/t-line-calculator.config.service";
 import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
 import {AssertionError} from 'assert'
-import {RawPost} from "../t-line/utils/types";
+import {RawPost} from "../../utils/types";
 import getRaw from '../../utils/getRawPostObject.spec.util'
 import getSortedPostObj from '../../utils/getSortedPostObject.spec.util'
 

@@ -1,4 +1,4 @@
-import {RawPost} from "../modules/t-line/utils/types";
+import {RawPost} from "./types";
 
 export default (id: number, sec?: string): RawPost => {
     return {

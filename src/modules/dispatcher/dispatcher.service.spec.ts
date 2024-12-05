@@ -4,7 +4,7 @@ import {describe, expect, it, beforeEach} from '@jest/globals';
 import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
 import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
 import {TLineCalculatorConfigService} from '../../configs/t-line-calculator.config/t-line-calculator.config.service'
-import {RawPost, SortedPost} from "../t-line/utils/types";
+import {RawPost, SortedPost} from "../../utils/types";
 import getRaw from '../../utils/getRawPostObject.spec.util'
 import {BatchCalculatorService} from "../batch-calculator/batch-calculator.service";
 

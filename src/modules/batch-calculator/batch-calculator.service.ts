@@ -3,7 +3,7 @@ import {strictEqual} from 'assert'
 import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
 import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
 import {TLineCacheQueriesEnum} from "../../utils/TLineCacheQueriesEnum";
-import {RawPost, SortedPost} from "../t-line/utils/types";
+import {RawPost, SortedPost} from "../../utils/types";
 
 @Injectable()
 export class BatchCalculatorService {

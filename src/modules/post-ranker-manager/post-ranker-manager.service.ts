@@ -1,11 +1,11 @@
 import {Injectable} from '@nestjs/common';
-import {JobListing} from "../t-line/utils/types"
+import {GenericJobListing} from "../../utils/types"
 
 @Injectable()
 export class PostRankerManagerService {
     constructor() {}
 
-    async rankPosts(job: JobListing): Promise<number> {
+    async rankPosts(job: GenericJobListing): Promise<number> {
         //data in: raw post data
 
         // const startCache = []; // precache for this job|user|mode

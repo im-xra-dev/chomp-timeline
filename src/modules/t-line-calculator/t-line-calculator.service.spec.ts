@@ -1,7 +1,7 @@
 import { AssertionError } from "assert";
 import { Test, TestingModule } from '@nestjs/testing';
 import {beforeEach, describe, expect, it} from "@jest/globals";
-import {PostState, UserRelation} from "../t-line/utils/types";
+import {PostState, UserRelation} from "../../utils/types";
 import { TLineCalculatorService } from './t-line-calculator.service';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import { getPostState, relevanceTest, getAuthorRelation } from './t-line-calculator.service.spec.utils';

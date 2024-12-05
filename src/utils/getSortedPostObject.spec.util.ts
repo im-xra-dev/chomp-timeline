@@ -1,4 +1,4 @@
-import {SortedPost} from "../modules/t-line/utils/types";
+import {SortedPost} from "./types";
 
 export default (id: number, score: number, sec?: string): SortedPost => {
     return {
