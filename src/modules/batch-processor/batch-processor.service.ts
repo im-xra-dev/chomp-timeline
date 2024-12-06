@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import {ConcurrentBatch, SortedPost} from "../../utils/types";
+import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
 
 @Injectable()
 export class BatchProcessorService {
-
+    constructor(
+        private readonly tlineCacherService: TlineCacherService,
+    ) {}
 
     // n = number of posts found
     // c = specified cache size (constant)
