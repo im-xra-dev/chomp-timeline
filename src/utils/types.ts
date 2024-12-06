@@ -1,5 +1,5 @@
-import {DiscoveryModes} from 'DiscoveryModes';
-import {JobTypes} from 'JobTypes';
+import {DiscoveryModes} from 'DiscoveryModes'
+import {JobTypes} from 'JobTypes'
 
 export type UserRelation = { follows: boolean, muted: boolean, score: number }
 export type PostState = { weight: number, seen: boolean, vote: number }
@@ -15,6 +15,8 @@ export type RawPost = {
     postState: PostState
 }
 
+export type QueryData = {[jobMode: string]: RawPost[]};
+
 export type SortedPost = {
     id: string,
     sec: string,
@@ -25,38 +27,43 @@ export type SortedPost = {
 
 export type ConcurrentBatch = Promise<SortedPost[]>
 
+export type CASCADE = JobTypes.QUERY_LOAD | JobTypes.INIT;
+export type JobResult = JobTypes.ABORT | JobTypes.CONTINUE;
+
 //generic job listing
-export type GenericJobListing = {
+export interface GenericJobListing {
+    readonly jobType: unknown,
     readonly jobid: string,
     readonly userid: string,
     readonly broadcast?: unknown,
 }
 
-export type CacheClearJobListing = {
+export interface CacheClearJobListing extends GenericJobListing {
     readonly jobType: JobTypes.CLEAR_CACHE,
-} & GenericJobListing
+}
 
-export type QueryJobListing = {
-    readonly jobType: JobTypes.QUERY,
-    //mode for the query
-    readonly mode: DiscoveryModes,
+export interface QueryJobListing extends GenericJobListing {
+    readonly jobType: JobTypes.QUERY | CASCADE,
+    //modes for the query
+    readonly modes: DiscoveryModes[],
     //how large should the queried input be
     readonly query: number,
     //how large should the cache // output be
     readonly cache: number,
-} & GenericJobListing;
+} 
 
-export type LoadJobListing = {
-    readonly jobType: JobTypes.LOAD,
+export interface LoadJobListing extends GenericJobListing {
+    readonly jobType: JobTypes.LOAD | CASCADE,
+    //what pools of data should be loaded
+    readonly modes: DiscoveryModes[],
     //The total qty of posts to publish to the user
     readonly publish: number,
-} & GenericJobListing;
+}
 
-export type QueryLoadJobListing = {
+export interface QueryLoadJobListing extends LoadJobListing, QueryJobListing {
     readonly jobType: JobTypes.QUERY_LOAD,
-} & LoadJobListing & QueryJobListing;
+} 
 
-export type InitJobListing = {
+export interface InitJobListing extends LoadJobListing, QueryJobListing {
     readonly jobType: JobTypes.INIT,
-} & QueryLoadJobListing;
-
+}

@@ -1,3 +1,12 @@
+# Job Results
+#### Abort
+Abort is used to skip over cascading jobs after an error has already been handled. An example of when
+this would be used is if an INIT job tries to initialize data that has already been initialized by another process.
+
+#### Continue
+Continue is the opposite of the abort job. It is returned when a job is not aborted to indicate that any
+cascading jobs may continue being processed
+
 # Job types
 The job types are events that the system listens for. Some may originate from outside the microservice while
 others may be dispatched from within the service

@@ -1,11 +1,15 @@
 import {Injectable} from '@nestjs/common';
-import {GenericJobListing} from "../../utils/types"
+import {JobResult, QueryJobListing} from "../../utils/types"
+import {JobTypes} from "../../utils/JobTypes";
+import {QueryPoolService} from "../query-pool/query-pool.service";
 
 @Injectable()
 export class PostRankerManagerService {
-    constructor() {}
+    constructor(
+        private readonly queryPoolService: QueryPoolService,
+    ) {}
 
-    async rankPosts(job: GenericJobListing): Promise<number> {
+    async queryJob(job: QueryJobListing): Promise<JobResult> {
         //data in: raw post data
 
         // const startCache = []; // precache for this job|user|mode
@@ -22,28 +26,11 @@ export class PostRankerManagerService {
         //      set seen false && sec total -- && clear attrs
         //   else break;
 
-
-        //TODO: seperate out but this will insert into active tline
-        // push to users pool.  pop job.serve and push to live pool (O(n) // O(job.serve * 2))
-        // these are the posts that get broadcast so that their content can be cached
-
         //return total added
-        return 0;
+        return JobTypes.CONTINUE
     };
 
-
-
-    async queryFollowedSectionPosts(postSlots: number) {
-        //const secsAvaialab
-        // x = calculateSectionsToQuery(postSlots: number, secsAvailable: number)
-        //pop x sections from cache
-        //query from neo || mock
-
-        //rank posts (concurrent batch count set)
-
-        //for each update and splice section into cache (based on sec normalized score && total seen)
-    }
-
+    //some old notes
     //choose mode
     // x = calculateSectionsToQuery
     // pop top x
