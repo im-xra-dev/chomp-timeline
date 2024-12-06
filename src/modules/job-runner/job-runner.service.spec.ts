@@ -279,6 +279,8 @@ describe('JobRunnerService', () => {
         });
     });
 
+    //test the helper utils
+    
     describe('doQuery', () => {
         it('should return true for job types QUERY, QUERY_LOAD and INIT', () => {
             const QUERY = service.doQuery(JobTypes.QUERY);
