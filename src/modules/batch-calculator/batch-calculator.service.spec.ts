@@ -131,7 +131,8 @@ describe('BatchCalculatorService', () => {
 
             //ensure posts are not rejected at the relevance stage and can pass on to the
             //weighting stage
-            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore').mockReturnValue(REJECT_SCORE + 1);
+            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore')
+                .mockReturnValue(REJECT_SCORE + 1);
 
             //everything <= REJECT_SCORE should be rejected
             //everything >  REJECT_SCORE is valid

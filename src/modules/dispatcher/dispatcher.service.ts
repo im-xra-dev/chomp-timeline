@@ -25,26 +25,40 @@ export class DispatcherService {
      * @param outSize
      * @param minScore
      */
-    dispatchConcurrentPosts(rawPool: RawPost[], outSize: number, minScore: number): ConcurrentBatch[] {
+    dispatchConcurrentPosts(rawPool: readonly RawPost[], outSize: number, minScore: number): ConcurrentBatch[] {
         strictEqual(outSize > 0, true,
             'dispatchConcurrentPosts -> outSize must be > 0');
 
         strictEqual(minScore >= 0, true,
             'dispatchConcurrentPosts -> minScore must be >= 0');
 
-        const jobBuilder: ConcurrentBatch[] = [];
-        const inSize = rawPool.length;
         //calculates the number of batches that should be dispatched to optimally calculate this data
-        const bc = this.tlineCalculatorService.calculateBatchCount(inSize, outSize);
+        const inSize = rawPool.length;
+        const batchCount = this.tlineCalculatorService.calculateBatchCount(inSize, outSize);
+        //In the event of data overload, failsafe. If the batch count is too large
+        //or somehow greater than the input size, fail gracefully
+        if(batchCount > inSize || batchCount > 50){
+            console.error({batchCount, inSize, message: "failsafe triggered >> dispatchConcurrentPosts"});
+            return [];
+        }
+
         //based on the number of batches to dispatch, calculate how many posts should fit in each
+        const actualBatchSize = Math.floor(inSize / batchCount);
+        //In the event of data overload, failsafe. If the actualBatchSize is too large, fail gracefully
+        if(actualBatchSize > 1000){
+            console.error({actualBatchSize, batchCount, inSize,
+                message: "failsafe triggered >> dispatchConcurrentPosts"});
+            return [];
+        }
         //and calculate how many "overflow" posts there will be (because decimal qtys of posts dont exist)
-        const actualBatchSize = Math.floor(inSize / bc);
-        const notLeftovers = bc * actualBatchSize;
+        const notLeftovers = batchCount * actualBatchSize;
         const leftover = inSize - notLeftovers;
+
+        const jobBuilder: ConcurrentBatch[] = [];
 
         //This for loop processes all the batches, filling them with the required post size
         //handling any of the overflow posts and finally dispatching the job to the jobBuilder
-        for (let batchesProcessed = 0; batchesProcessed < bc; batchesProcessed++) {
+        for (let batchesProcessed = 0; batchesProcessed < batchCount; batchesProcessed++) {
             const jobBatch: RawPost[] = [];
 
             //add the next actualBatchSize posts to the batch. This is the calculated size of each batch
