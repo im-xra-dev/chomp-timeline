@@ -1,10 +1,18 @@
 import {DiscoveryModes} from 'DiscoveryModes'
 import {JobTypes} from 'JobTypes'
 
-export type UserRelation = { follows: boolean, muted: boolean, score: number }
-export type PostState = { weight: number, seen: boolean, vote: number }
+export type UserRelation = Readonly<{
+    follows: boolean,
+    muted: boolean,
+    score: number
+}>
+export type PostState = Readonly<{
+    weight: number,
+    seen: boolean,
+    vote: number
+}>
 
-export type RawPost = {
+export type RawPost = Readonly<{
     id: string,
     sec: string,
     secRelationalScore: number,
@@ -13,19 +21,18 @@ export type RawPost = {
     thrRelationalScore: number,
     autRelation: UserRelation,
     postState: PostState
-}
+}>
 
-export type QueryData = {[jobMode: string]: RawPost[]};
-
-export type SortedPost = {
+export type SortedPost = Readonly<{
     id: string,
     sec: string,
     seen: boolean,
     vote: number,
     score: number,
-}
+}>
 
-export type ConcurrentBatch = Promise<SortedPost[]>
+export type ConcurrentBatch = Promise<readonly SortedPost[]>
+export type QueryData = { [jobMode: string]: readonly SortedPost[] };
 
 export type CASCADE = JobTypes.QUERY_LOAD | JobTypes.INIT;
 export type JobResult = JobTypes.ABORT | JobTypes.CONTINUE;
@@ -50,7 +57,7 @@ export interface QueryJobListing extends GenericJobListing {
     readonly query: number,
     //how large should the cache // output be
     readonly cache: number,
-} 
+}
 
 export interface LoadJobListing extends GenericJobListing {
     readonly jobType: JobTypes.LOAD | CASCADE,
@@ -62,7 +69,7 @@ export interface LoadJobListing extends GenericJobListing {
 
 export interface QueryLoadJobListing extends LoadJobListing, QueryJobListing {
     readonly jobType: JobTypes.QUERY_LOAD,
-} 
+}
 
 export interface InitJobListing extends LoadJobListing, QueryJobListing {
     readonly jobType: JobTypes.INIT,
