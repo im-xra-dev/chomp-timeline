@@ -141,7 +141,7 @@ Abbreviations should be avoided, unless it is explicitly clear what it means (eg
 
 > **Files**
 >
-> Files containing an enum should be named in `UpperCamelCase`
+> Files containing an enum or react module should be named in `UpperCamelCase`
 >
 > Other files and paths should be named in `lower-kebab-case`
 
