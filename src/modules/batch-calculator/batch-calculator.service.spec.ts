@@ -183,7 +183,7 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async ()=>{
             //if the value is locally cached, it should return that value
             const cacheRef = {"test": 69};
-            const out = await service.getCachedSeenCount("test", cacheRef);
+            const out = await service.getCachedSeenCount(cacheRef, "test");
             expect(out).toBe(69);
         });
 
@@ -193,7 +193,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount("test", cacheRef);
+            const out = await service.getCachedSeenCount(cacheRef, "test");
 
             expect(out).toBe(69);
             expect(cacheRef["test"]).toBe(69);
@@ -205,7 +205,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount("test", cacheRef);
+            const out = await service.getCachedSeenCount(cacheRef, "test");
             expect(out).toBe(0);
             expect(cacheRef["test"]).toBe(0);
         });
