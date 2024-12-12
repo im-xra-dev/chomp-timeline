@@ -2,7 +2,20 @@
 > The problem: Given 2 inputs, an ordered list CacheIn of length c, and an unordered list Input of length n,
 > find the largest c elements, returning them in an ordered list CacheOut of length c.
 
-The time complexity of the sorting phase of the algorithm simplifies to a worst case of `o = (sqrt(2c) + 0.5)n` 
+##### Improvements
+
+I believe that the batched sorting would be more efficient using merge sort.
+
+For small c values, the currently implemented method appears to have a slightly better best case, but worse worst case
+than using merge sort.
+
+Sorting against the cache appears to be less efficient when using merge sort for cache size > 10. 
+
+I intend to do further testing once the system is able to be benchmarked for specific implementations of these algorithms.
+
+##### Complexity
+
+The time complexity of the sorting algorithms simplifies to a worst case of `o = (sqrt(2c) + 0.5)n` 
 where:
 
 - o is the total operations
