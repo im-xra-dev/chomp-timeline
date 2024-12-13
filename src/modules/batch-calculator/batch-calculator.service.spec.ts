@@ -131,8 +131,7 @@ describe('BatchCalculatorService', () => {
 
             //ensure posts are not rejected at the relevance stage and can pass on to the
             //weighting stage
-            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore')
-                .mockReturnValue(REJECT_SCORE + 1);
+            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore').mockReturnValue(REJECT_SCORE + 1);
 
             //everything <= REJECT_SCORE should be rejected
             //everything >  REJECT_SCORE is valid
@@ -183,7 +182,7 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async ()=>{
             //if the value is locally cached, it should return that value
             const cacheRef = {"test": 69};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const out = await service.getCachedSeenCount("test", cacheRef);
             expect(out).toBe(69);
         });
 
@@ -193,7 +192,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const out = await service.getCachedSeenCount("test", cacheRef);
 
             expect(out).toBe(69);
             expect(cacheRef["test"]).toBe(69);
@@ -205,7 +204,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const out = await service.getCachedSeenCount("test", cacheRef);
             expect(out).toBe(0);
             expect(cacheRef["test"]).toBe(0);
         });

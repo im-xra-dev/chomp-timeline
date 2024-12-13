@@ -64,7 +64,8 @@ export class TLineCalculatorService {
 
         //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
         const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
-        return Math.ceil(idealBatchCount);
+        const batchCount = Math.ceil(idealBatchCount);
+        return batchCount;
     }
 
     /**Calculates relevance score for a particular post
