@@ -1,7 +1,7 @@
 //functions to handle object defaults
 
 import {PostState, UserRelation} from "../../utils/types";
-import {TLineCalculatorService} from '../t-line-calculator/t-line-calculator.service';
+import {TLineCalculatorService} from './t-line-calculator.service';
 
 /**test utility to provide default values for the attributes not being tested
  *
