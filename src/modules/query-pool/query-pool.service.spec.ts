@@ -1,8 +1,8 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {QueryPoolService} from './query-pool.service';
-import {describe, expect, it, beforeEach} from '@jest/globals';
-import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
-import {NeoQueryService} from "../neo-query/neo-query.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { QueryPoolService } from './query-pool.service';
+import { describe, expect, it, beforeEach } from '@jest/globals';
+import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { NeoQueryService } from '../neo-query/neo-query.service';
 
 describe('QueryPoolService', () => {
     let service: QueryPoolService;

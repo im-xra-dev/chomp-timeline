@@ -1,7 +1,7 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {InitCacheService} from './init-cache.service';
-import {beforeEach, describe, expect, it} from '@jest/globals';
-import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { InitCacheService } from './init-cache.service';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
 
 describe('InitCacheService', () => {
     let service: InitCacheService;

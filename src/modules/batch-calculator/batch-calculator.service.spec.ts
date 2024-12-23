@@ -1,13 +1,13 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {describe, expect, it, beforeEach} from "@jest/globals";
-import {BatchCalculatorService} from './batch-calculator.service';
-import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
-import {TLineCalculatorConfigService} from "../../configs/t-line-calculator.config/t-line-calculator.config.service";
-import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
-import {AssertionError} from 'assert'
-import {RawPost} from "../../utils/types";
-import getRaw from '../../utils/getRawPostObject.spec.util'
-import getSortedPostObj from '../../utils/getSortedPostObject.spec.util'
+import { Test, TestingModule } from '@nestjs/testing';
+import { describe, expect, it, beforeEach } from '@jest/globals';
+import { BatchCalculatorService } from './batch-calculator.service';
+import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
+import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
+import { AssertionError } from 'assert';
+import { RawPost } from '../../utils/types';
+import getRaw from '../../utils/getRawPostObject.spec.util';
+import getSortedPostObj from '../../utils/getSortedPostObject.spec.util';
 
 describe('BatchCalculatorService', () => {
     let service: BatchCalculatorService;
@@ -25,15 +25,16 @@ describe('BatchCalculatorService', () => {
                     useValue: {
                         dispatch: jest.fn(),
                         mutex: jest.fn(),
-                    }
+                    },
                 },
             ],
         }).compile();
 
         service = module.get<BatchCalculatorService>(BatchCalculatorService);
-        tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
+        tLineCalculatorService = module.get<TLineCalculatorService>(
+            TLineCalculatorService,
+        );
         tlineCacherService = module.get<TlineCacherService>(TlineCacherService);
-
     });
 
     it('should be defined', () => {
@@ -52,14 +53,20 @@ describe('BatchCalculatorService', () => {
         //other posts move to next stage
         //the score is not too important here as it passes to the next stage so long as
         //it is greater than the reject score
-        const relevanceSpy = jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore');
+        const relevanceSpy = jest.spyOn(
+            tLineCalculatorService,
+            'calculateRelevanceScore',
+        );
         relevanceSpy.mockReturnValueOnce(REJECT_SCORE);
-        relevanceSpy.mockReturnValue(REJECT_SCORE+1);
+        relevanceSpy.mockReturnValue(REJECT_SCORE + 1);
 
         //spy on the weight calculator and return scores
         //checks 2 equal scores, high then low, low then high
         //and the final post gets rejected at this stage
-        const weightSpy = jest.spyOn(tLineCalculatorService, 'calculateTotalSeenWeight');
+        const weightSpy = jest.spyOn(
+            tLineCalculatorService,
+            'calculateTotalSeenWeight',
+        );
         weightSpy.mockReturnValueOnce(10);
         weightSpy.mockReturnValueOnce(11);
         weightSpy.mockReturnValueOnce(9);
@@ -69,16 +76,30 @@ describe('BatchCalculatorService', () => {
         weightSpy.mockReturnValueOnce(REJECT_SCORE);
 
         //generates the mock data and expected output
-        const expectedOrder: string[] = ["MOCK3", "MOCK1", "MOCK0", "MOCK2", "MOCK4", "MOCK5",];
-        const inputData: RawPost[] =
-            [getRaw(-1), getRaw(0), getRaw(1), getRaw(2),
-                getRaw(3), getRaw(4), getRaw(5), getRaw(6)];
+        const expectedOrder: string[] = [
+            'MOCK3',
+            'MOCK1',
+            'MOCK0',
+            'MOCK2',
+            'MOCK4',
+            'MOCK5',
+        ];
+        const inputData: RawPost[] = [
+            getRaw(-1),
+            getRaw(0),
+            getRaw(1),
+            getRaw(2),
+            getRaw(3),
+            getRaw(4),
+            getRaw(5),
+            getRaw(6),
+        ];
 
         const output = await service.batchCalculate(inputData, REJECT_SCORE);
 
         expect(output.length).toBe(expectedOrder.length);
         for (let i = 0; i < expectedOrder.length; i++) {
-            expect(output[i].id).toBe(expectedOrder[i])
+            expect(output[i].id).toBe(expectedOrder[i]);
         }
     });
 
@@ -103,7 +124,7 @@ describe('BatchCalculatorService', () => {
         it('should return an empty array if an empty array is provided', async () => {
             //tests that the system doesnt get confused if the batch is empty for some reason
             const output = await service.batchCalculate([], 10);
-            expect(output.length).toBe(0)
+            expect(output.length).toBe(0);
         });
 
         it('should drop rawScore <= minScore posts', async () => {
@@ -113,17 +134,21 @@ describe('BatchCalculatorService', () => {
 
             //everything <= REJECT_SCORE should be rejected
             //everything >  REJECT_SCORE is valid
-            const spy = jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore');
+            const spy = jest.spyOn(
+                tLineCalculatorService,
+                'calculateRelevanceScore',
+            );
             spy.mockReturnValueOnce(REJECT_SCORE - 1);
             spy.mockReturnValueOnce(REJECT_SCORE);
             spy.mockReturnValueOnce(REJECT_SCORE + 1);
 
-            const output = await service.batchCalculate([
-                getRaw(0), getRaw(1), getRaw(2)
-            ], REJECT_SCORE);
+            const output = await service.batchCalculate(
+                [getRaw(0), getRaw(1), getRaw(2)],
+                REJECT_SCORE,
+            );
 
             expect(output.length).toBe(1);
-            expect(output[0].id).toBe("MOCK2");
+            expect(output[0].id).toBe('MOCK2');
         });
         it('should drop weightedScore <= minScore posts', async () => {
             //test that the posts are dropped correctly at the weighting score stage
@@ -131,22 +156,28 @@ describe('BatchCalculatorService', () => {
 
             //ensure posts are not rejected at the relevance stage and can pass on to the
             //weighting stage
-            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore')
-                .mockReturnValue(REJECT_SCORE + 1);
+            jest.spyOn(
+                tLineCalculatorService,
+                'calculateRelevanceScore',
+            ).mockReturnValue(REJECT_SCORE + 1);
 
             //everything <= REJECT_SCORE should be rejected
             //everything >  REJECT_SCORE is valid
-            const spy = jest.spyOn(tLineCalculatorService, 'calculateTotalSeenWeight');
+            const spy = jest.spyOn(
+                tLineCalculatorService,
+                'calculateTotalSeenWeight',
+            );
             spy.mockReturnValueOnce(REJECT_SCORE - 1);
             spy.mockReturnValueOnce(REJECT_SCORE);
             spy.mockReturnValueOnce(REJECT_SCORE + 1);
 
-            const output = await service.batchCalculate([
-                getRaw(0), getRaw(1), getRaw(2)
-            ], REJECT_SCORE);
+            const output = await service.batchCalculate(
+                [getRaw(0), getRaw(1), getRaw(2)],
+                REJECT_SCORE,
+            );
 
             expect(output.length).toBe(1);
-            expect(output[0].id).toBe("MOCK2");
+            expect(output[0].id).toBe('MOCK2');
         });
 
         it('should decrease weight of identical posts by total processed/seen (in same sec)', async () => {
@@ -155,11 +186,17 @@ describe('BatchCalculatorService', () => {
             const RAW_SCORE = 100;
 
             //the spy is called with the parameters we are checking
-            const spy = jest.spyOn(tLineCalculatorService, 'calculateTotalSeenWeight');
+            const spy = jest.spyOn(
+                tLineCalculatorService,
+                'calculateTotalSeenWeight',
+            );
             spy.mockImplementation(jest.fn());
 
             //tests should pass through the relevance checks
-            jest.spyOn(tLineCalculatorService, 'calculateRelevanceScore').mockReturnValue(RAW_SCORE);
+            jest.spyOn(
+                tLineCalculatorService,
+                'calculateRelevanceScore',
+            ).mockReturnValue(RAW_SCORE);
 
             //set up the cache spy to initialize the local cache
             //the local cache should be used after it has been initialized
@@ -167,8 +204,12 @@ describe('BatchCalculatorService', () => {
             cacheSpy.mockResolvedValueOnce(undefined);
 
             //sets up input data and runs the test
-            const inputData: RawPost[] =
-                [getRaw(0, "a"), getRaw(1, "a"), getRaw(2, "a"), getRaw(3, "a")];
+            const inputData: RawPost[] = [
+                getRaw(0, 'a'),
+                getRaw(1, 'a'),
+                getRaw(2, 'a'),
+                getRaw(3, 'a'),
+            ];
 
             await service.batchCalculate(inputData, 0);
 
@@ -180,66 +221,73 @@ describe('BatchCalculatorService', () => {
     });
 
     describe('getCachedSeenCount', () => {
-        it('should return the value stored in "seenData" if it exists', async ()=>{
+        it('should return the value stored in "seenData" if it exists', async () => {
             //if the value is locally cached, it should return that value
-            const cacheRef = {"test": 69};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const cacheRef = { test: 69 };
+            const out = await service.getCachedSeenCount(cacheRef, 'test');
             expect(out).toBe(69);
         });
 
-        it('should return the value from redis if it exists', async ()=>{
+        it('should return the value from redis if it exists', async () => {
             //if the value is not locally cached, it should query it from redis
             //if a value is returned, that is returned and stored in the cache
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const out = await service.getCachedSeenCount(cacheRef, 'test');
 
             expect(out).toBe(69);
-            expect(cacheRef["test"]).toBe(69);
+            expect(cacheRef['test']).toBe(69);
         });
 
-        it('should return 0 if value is not in local or redis cache', async ()=>{
+        it('should return 0 if value is not in local or redis cache', async () => {
             //if the value is not locally cached, it should query it from redis
             //if a value is not returned, it should default to 0, returning and locally caching 0
-            jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
+            jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(
+                undefined,
+            );
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, "test");
+            const out = await service.getCachedSeenCount(cacheRef, 'test');
             expect(out).toBe(0);
-            expect(cacheRef["test"]).toBe(0);
+            expect(cacheRef['test']).toBe(0);
         });
     });
 
     describe('sortHighToLow', () => {
-        it('should insert the first post at index 0', ()=>{
+        it('should insert the first post at index 0', () => {
             //ensures element 0 contains the first element
             const sorter = [];
             service.sortHighToLow(sorter, getSortedPostObj(0, 10));
             expect(sorter[0].id).toBe('MOCK0');
         });
 
-        it('should insert the worst post at the end', ()=>{
+        it('should insert the worst post at the end', () => {
             //ensures lowest ranked posts are sorted at the bottom
-            const sorter =
-                [getSortedPostObj(1, 9), getSortedPostObj(2, 5), getSortedPostObj(3, 1)];
+            const sorter = [
+                getSortedPostObj(1, 9),
+                getSortedPostObj(2, 5),
+                getSortedPostObj(3, 1),
+            ];
             service.sortHighToLow(sorter, getSortedPostObj(0, 0));
             expect(sorter[3].id).toBe('MOCK0');
         });
 
-        it('should insert the best post at index 0', ()=>{
+        it('should insert the best post at index 0', () => {
             //ensures highest ranked posts are sorted to the top
-            const sorter =
-                [getSortedPostObj(1, 9), getSortedPostObj(2, 5), getSortedPostObj(3, 1)];
+            const sorter = [
+                getSortedPostObj(1, 9),
+                getSortedPostObj(2, 5),
+                getSortedPostObj(3, 1),
+            ];
             service.sortHighToLow(sorter, getSortedPostObj(0, 10));
             expect(sorter[0].id).toBe('MOCK0');
         });
 
-        it('should insert the identical posts at the bottom', ()=>{
+        it('should insert the identical posts at the bottom', () => {
             //place identical posts at the bottom, as there is no point
             //iterating over the posts of the same score for no reason
-            const sorter =
-                [getSortedPostObj(1, 9)];
+            const sorter = [getSortedPostObj(1, 9)];
             service.sortHighToLow(sorter, getSortedPostObj(0, 9));
             expect(sorter[1].id).toBe('MOCK0');
         });

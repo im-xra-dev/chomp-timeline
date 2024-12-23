@@ -1,4 +1,4 @@
-import {SortedPost} from "./types";
+import { SortedPost } from './types';
 
 export default (id: number, score: number, sec?: string): SortedPost => {
     return {
@@ -7,5 +7,5 @@ export default (id: number, score: number, sec?: string): SortedPost => {
         score: score,
         seen: false,
         vote: 0,
-    }
-}
+    };
+};

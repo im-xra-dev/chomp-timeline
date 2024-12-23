@@ -1,4 +1,4 @@
-import {RawPost} from "./types";
+import { RawPost } from './types';
 
 export default (id: number, sec?: string): RawPost => {
     return {
@@ -8,7 +8,7 @@ export default (id: number, sec?: string): RawPost => {
         postPersonalScore: 10,
         thrRelationalScore: 10,
         secRelationalScore: 10,
-        autRelation: {follows: false, muted: true, score: 10},
-        postState: {weight: 10, vote: 0, seen: false},
-    }
-}
+        autRelation: { follows: false, muted: true, score: 10 },
+        postState: { weight: 10, vote: 0, seen: false },
+    };
+};

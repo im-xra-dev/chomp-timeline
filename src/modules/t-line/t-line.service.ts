@@ -1,12 +1,13 @@
-import {Injectable} from '@nestjs/common';
-import {DiscoveryModes} from '../../utils/DiscoveryModes'
-import {DispatcherService} from '../dispatcher/dispatcher.service'
+import { Injectable } from '@nestjs/common';
+import { DiscoveryModes } from '../../utils/DiscoveryModes';
+import { DispatcherService } from '../dispatcher/dispatcher.service';
 
 @Injectable()
 export class TLineService {
-
     constructor(private readonly postRankerService: DispatcherService) {}
-    ping(){return "hi"}
+    ping() {
+        return 'hi';
+    }
 
     decideMode(): DiscoveryModes {
         //TODO: initial implementation will only focus on followed secs
@@ -18,12 +19,10 @@ export class TLineService {
         //init new object
     }
 
-
     //called internally from program and from other internal CHOMP modules
     async generateBlock(total: number) {
         //adds total posts to the tline pool and seen lookup
         //these should be generated behind the scenes
-
         //decide mode(s)
         //if followed sections then queryFollowedSectionPosts
     }

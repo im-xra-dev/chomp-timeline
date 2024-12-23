@@ -1,10 +1,10 @@
-import {Injectable} from '@nestjs/common';
-import {JobResult, QueryJobListing} from "../../utils/types"
-import {JobTypes} from "../../utils/JobTypes";
-import {QueryPoolService} from "../query-pool/query-pool.service";
-import {DispatcherService} from "../dispatcher/dispatcher.service";
-import {BatchProcessorService} from "../batch-processor/batch-processor.service";
-import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
+import { Injectable } from '@nestjs/common';
+import { JobResult, QueryJobListing } from '../../utils/types';
+import { JobTypes } from '../../utils/JobTypes';
+import { QueryPoolService } from '../query-pool/query-pool.service';
+import { DispatcherService } from '../dispatcher/dispatcher.service';
+import { BatchProcessorService } from '../batch-processor/batch-processor.service';
+import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
 
 @Injectable()
 export class PostRankerManagerService {
@@ -13,8 +13,7 @@ export class PostRankerManagerService {
         private readonly queryPoolService: QueryPoolService,
         private readonly dispatcherService: DispatcherService,
         private readonly batchProcessorService: BatchProcessorService,
-    ) {
-    }
+    ) {}
 
     async queryJob(job: QueryJobListing): Promise<JobResult> {
         //data in: raw post data
@@ -34,8 +33,8 @@ export class PostRankerManagerService {
         //   else break;
 
         //return total added
-        return JobTypes.CONTINUE
-    };
+        return JobTypes.CONTINUE;
+    }
 
     //some old notes
     //choose mode
@@ -47,5 +46,4 @@ export class PostRankerManagerService {
     //  drop -ve, splice&seen +ve
     // update tobj attribs?
     // splice tobj based on calculateTotalSeenWeight(normalized, total seen)
-
 }

@@ -1,15 +1,11 @@
-import {Injectable} from '@nestjs/common';
-import {strictEqual} from 'assert'
-import {PostState, UserRelation} from "../../utils/types";
-import {TLineCalculatorConfigService} from "../../configs/t-line-calculator.config/t-line-calculator.config.service";
+import { Injectable } from '@nestjs/common';
+import { strictEqual } from 'assert';
+import { PostState, UserRelation } from '../../utils/types';
+import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
 export class TLineCalculatorService {
-
-    constructor(
-        private readonly C: TLineCalculatorConfigService
-    ) {
-    }
+    constructor(private readonly C: TLineCalculatorConfigService) {}
 
     /**Calculate how many section to query to build the data
      *
@@ -20,14 +16,20 @@ export class TLineCalculatorService {
      * @param secsAvailable
      */
     calculateSectionsToQuery(postSlots: number, secsAvailable: number): number {
-        strictEqual(postSlots <= 0, false,
-            'calculateSectionsToQuery -> postSlots must be > 0');
-        strictEqual(secsAvailable <= 0, false,
-            'calculateSectionsToQuery -> secsAvailable must be > 0');
+        strictEqual(
+            postSlots <= 0,
+            false,
+            'calculateSectionsToQuery -> postSlots must be > 0',
+        );
+        strictEqual(
+            secsAvailable <= 0,
+            false,
+            'calculateSectionsToQuery -> secsAvailable must be > 0',
+        );
 
         const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
 
-        return (secsAvailable < ideal) ? secsAvailable : ideal;
+        return secsAvailable < ideal ? secsAvailable : ideal;
     }
 
     /**calculate how many batches to optimally run the calculations in
@@ -57,13 +59,22 @@ export class TLineCalculatorService {
      * @param outputSize
      */
     calculateBatchCount(inputSize: number, outputSize: number): number {
-        strictEqual(inputSize <= 0, false,
-            'calculateBatchCount -> inputSize must be > 0');
-        strictEqual(outputSize <= 0, false,
-            'calculateBatchCount -> outputSize must be > 0');
+        strictEqual(
+            inputSize <= 0,
+            false,
+            'calculateBatchCount -> inputSize must be > 0',
+        );
+        strictEqual(
+            outputSize <= 0,
+            false,
+            'calculateBatchCount -> outputSize must be > 0',
+        );
 
         //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
-        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
+        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(
+            inputSize,
+            outputSize,
+        );
         return Math.ceil(idealBatchCount);
     }
 
@@ -79,28 +90,33 @@ export class TLineCalculatorService {
      * @param autRelation
      * @param postState
      */
-    calculateRelevanceScore(secRelationalScore: number, postPersonalScore: number,
-                            authorsPersonalScore: number, thrRelationalScore: number,
-                            autRelation: UserRelation,
-                            postState: PostState): number {
+    calculateRelevanceScore(
+        secRelationalScore: number,
+        postPersonalScore: number,
+        authorsPersonalScore: number,
+        thrRelationalScore: number,
+        autRelation: UserRelation,
+        postState: PostState,
+    ): number {
         //negative scores are rejected
         if (autRelation.muted) return -1;
 
         //followed authors get a score boost
-        const authorRelationalScore = this.conditionalWeight(autRelation.follows, autRelation.score, this.C.C_FOLLOW_BOOST);
+        const authorRelationalScore = this.conditionalWeight(
+            autRelation.follows,
+            autRelation.score,
+            this.C.C_FOLLOW_BOOST,
+        );
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
-        const score =
-            this.weighted(
-                this.weighted(secRelationalScore, this.C.SW_SEC_REL)
-                + this.weighted(authorsPersonalScore, this.C.SW_AUTHOR_PER)
-                + this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL)
-                + this.weighted(thrRelationalScore, this.C.SW_THREAD_REL)
-                + this.weighted(postPersonalScore, this.C.SW_POST_PER)
-                , this.C.W_CALCULATED
-            )
-        ;
-
+        const score = this.weighted(
+            this.weighted(secRelationalScore, this.C.SW_SEC_REL) +
+                this.weighted(authorsPersonalScore, this.C.SW_AUTHOR_PER) +
+                this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL) +
+                this.weighted(thrRelationalScore, this.C.SW_THREAD_REL) +
+                this.weighted(postPersonalScore, this.C.SW_POST_PER),
+            this.C.W_CALCULATED,
+        );
         //viewed posts are weighted (by how much depends on view context
         if (postState.seen) return score * postState.weight;
         return score;
@@ -115,8 +131,11 @@ export class TLineCalculatorService {
      * @param seen
      */
     calculateTotalSeenWeight(score: number, seen: number): number {
-        strictEqual(seen < 0, false,
-            'calculateTotalSeenWeight -> seen must be > 0');
+        strictEqual(
+            seen < 0,
+            false,
+            'calculateTotalSeenWeight -> seen must be > 0',
+        );
 
         const weight = this.C.F_SEEN_WEIGHT(seen);
         return score * weight;
@@ -135,7 +154,6 @@ export class TLineCalculatorService {
 
     //util for simple weighting of values
     weighted(v: number, w: number): number {
-        return v * w
+        return v * w;
     }
-
 }

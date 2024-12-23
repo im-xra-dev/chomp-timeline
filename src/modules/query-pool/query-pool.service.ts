@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {QueryData, QueryJobListing} from "../../utils/types";
-import {NeoQueryService} from "../neo-query/neo-query.service";
-import {TLineCalculatorService} from "../t-line-calculator/t-line-calculator.service";
+import { QueryData, QueryJobListing } from '../../utils/types';
+import { NeoQueryService } from '../neo-query/neo-query.service';
+import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
 
 @Injectable()
 export class QueryPoolService {
@@ -16,7 +16,7 @@ export class QueryPoolService {
      *
      * @param job
      */
-    async queryAllModes(job: QueryJobListing): Promise<QueryData>{
+    async queryAllModes(job: QueryJobListing): Promise<QueryData> {
         return {};
     }
 
@@ -26,9 +26,7 @@ export class QueryPoolService {
         // x = calculateSectionsToQuery(postSlots: number, secsAvailable: number)
         //pop x sections from cache
         //query from neo || mock
-
         //rank posts (concurrent batch count set)
-
         //for each update and splice section into cache (based on sec normalized score && total seen)
     }
 }

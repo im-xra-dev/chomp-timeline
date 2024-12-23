@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {ConcurrentBatch, QueryData} from "../../utils/types";
-import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
+import { ConcurrentBatch, QueryData } from '../../utils/types';
+import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
 
 @Injectable()
 export class BatchProcessorService {
-    constructor(
-        private readonly tlineCacherService: TlineCacherService,
-    ) {}
+    constructor(private readonly tlineCacherService: TlineCacherService) {}
 
     // n = number of posts found
     // c = specified cache size (constant)
@@ -20,7 +18,9 @@ export class BatchProcessorService {
     //worst no-action case iterates o(rb) == o(n) -- already all seen (for each batch; discard all b posts)
     //best re-order case iterates o(rc) == o(fn) -> o(n) -- none discarded, each batch (r) iterates over top [c] elements
     //worst re-order case iterates o(rb+rc)) == o(n + fn) == o((f+1)n) -> o(n) -- one in each batch kept; all others discarded. each batch iterates over b (posts) + c
-    async processBatches(batchRunners: readonly ConcurrentBatch[]): Promise<QueryData> {
+    async processBatches(
+        batchRunners: readonly ConcurrentBatch[],
+    ): Promise<QueryData> {
         // for each concurrent job
         //   sortedB = await concurrentJobs[i]
         //   sortedC = currentCache of length <= job.cache

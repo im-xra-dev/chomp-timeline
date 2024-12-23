@@ -1,10 +1,10 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {PostRankerManagerService} from './post-ranker-manager.service';
-import {describe, expect, it, beforeEach} from '@jest/globals';
-import {QueryPoolService} from "../query-pool/query-pool.service";
-import {TlineCacherService} from "../tline-cacher/tline-cacher.service";
-import {DispatcherService} from "../dispatcher/dispatcher.service";
-import {BatchProcessorService} from "../batch-processor/batch-processor.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { PostRankerManagerService } from './post-ranker-manager.service';
+import { describe, expect, it, beforeEach } from '@jest/globals';
+import { QueryPoolService } from '../query-pool/query-pool.service';
+import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
+import { DispatcherService } from '../dispatcher/dispatcher.service';
+import { BatchProcessorService } from '../batch-processor/batch-processor.service';
 
 describe('PostRankerManagerService', () => {
     let service: PostRankerManagerService;
@@ -40,7 +40,9 @@ describe('PostRankerManagerService', () => {
             ],
         }).compile();
 
-        service = module.get<PostRankerManagerService>(PostRankerManagerService);
+        service = module.get<PostRankerManagerService>(
+            PostRankerManagerService,
+        );
     });
 
     it('should be defined', () => {

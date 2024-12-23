@@ -24,7 +24,7 @@ export class TLineCalculatorConfigService {
     C_IDEAL_POSTS_PER_SEC = 3;
 
     // desmos code y=\frac{1}{x+4}\ +\ 0.75
-    F_SEEN_WEIGHT = (x) => (1 / (x + 4)) + 0.75;
+    F_SEEN_WEIGHT = (x) => 1 / (x + 4) + 0.75;
 
     // * https://www.desmos.com/calculator/mglnoluywe
     // * https://www.desmos.com/3d/alifqxuuke
