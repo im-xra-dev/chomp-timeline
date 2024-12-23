@@ -1,7 +1,7 @@
 //functions to handle object defaults
 
-import {PostState, UserRelation} from "../../utils/types";
-import {TLineCalculatorService} from './t-line-calculator.service';
+import { PostState, UserRelation } from '../../utils/types';
+import { TLineCalculatorService } from './t-line-calculator.service';
 
 /**test utility to provide default values for the attributes not being tested
  *
@@ -9,18 +9,16 @@ import {TLineCalculatorService} from './t-line-calculator.service';
  * @param muted
  * @param score
  */
-export function getAuthorRelation(
-    {
-        follows = false,
-        muted = false,
-        score = 10
-    }:
-        {
-            follows?: boolean,
-            muted?: boolean,
-            score?: number
-        }): UserRelation {
-    return {follows, muted, score};
+export function getAuthorRelation({
+    follows = false,
+    muted = false,
+    score = 10,
+}: {
+    follows?: boolean;
+    muted?: boolean;
+    score?: number;
+}): UserRelation {
+    return { follows, muted, score };
 }
 
 /**test utility to provide default values for the attributes not being tested
@@ -29,18 +27,16 @@ export function getAuthorRelation(
  * @param weight
  * @param vote
  */
-export function getPostState(
-    {
-        seen = false,
-        weight = 1,
-        vote = 0
-    }:
-        {
-            seen?: boolean,
-            weight?: number,
-            vote?: number
-        }): PostState {
-    return {seen, weight, vote};
+export function getPostState({
+    seen = false,
+    weight = 1,
+    vote = 0,
+}: {
+    seen?: boolean;
+    weight?: number;
+    vote?: number;
+}): PostState {
+    return { seen, weight, vote };
 }
 
 /**test utility to provide default values for the attributes not being tested
@@ -58,18 +54,27 @@ export function getPostState(
 export function relevanceTest(
     service: TLineCalculatorService,
     {
-        secScore = 10, postScore = 10,
-        autScore = 10, thrScore = 10,
+        secScore = 10,
+        postScore = 10,
+        autScore = 10,
+        thrScore = 10,
         autRelation = getAuthorRelation({}),
-        postState = getPostState({})
-    }:
-        {
-            secScore?: number, postScore?: number,
-            autScore?: number, thrScore?: number,
-            autRelation?: UserRelation,
-            postState?: PostState
-        }): number {
+        postState = getPostState({}),
+    }: {
+        secScore?: number;
+        postScore?: number;
+        autScore?: number;
+        thrScore?: number;
+        autRelation?: UserRelation;
+        postState?: PostState;
+    },
+): number {
     return service.calculateRelevanceScore(
-        secScore, postScore, autScore, thrScore, autRelation, postState
+        secScore,
+        postScore,
+        autScore,
+        thrScore,
+        autRelation,
+        postState,
     );
 }

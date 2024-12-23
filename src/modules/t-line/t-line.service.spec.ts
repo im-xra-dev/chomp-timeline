@@ -1,8 +1,7 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {describe, expect, it, beforeEach} from '@jest/globals';
-import {TLineService} from './t-line.service';
-import {DispatcherService} from "../dispatcher/dispatcher.service";
-import {NeoQueryService} from "../neo-query/neo-query.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { describe, expect, it, beforeEach } from '@jest/globals';
+import { TLineService } from './t-line.service';
+import { DispatcherService } from '../dispatcher/dispatcher.service';
 
 describe('TLineService', () => {
     let service: TLineService;
@@ -16,7 +15,7 @@ describe('TLineService', () => {
                     useValue: {
                         rankPosts: jest.fn(),
                         queryFollowedSectionPosts: jest.fn(),
-                    }
+                    },
                 },
             ],
         }).compile();
