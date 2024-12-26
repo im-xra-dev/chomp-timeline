@@ -43,19 +43,16 @@ export class JobRunnerService {
         //if another job attempts to process before data is initialized, it should
         //dispatch an init job and abort itself
         if (job.jobType === JobTypes.INIT) {
-            const result: JobResult = await this.initCacheService.initJob(
-                job as InitJobListing,
-            );
+            const result: JobResult = await this.initCacheService.initJob(job as InitJobListing);
             if (result === JobTypes.ABORT) return;
         }
 
         //Query jobs will get a large pool of data from the neo4j database and condense it down into
         //a small pool of relevant posts ranked from most to least relevant, stored in the redis cache
         if (this.doQuery(job.jobType)) {
-            const result: JobResult =
-                await this.postRankerManagerService.queryJob(
-                    job as QueryJobListing,
-                );
+            const result: JobResult = await this.postRankerManagerService.queryJob(
+                job as QueryJobListing,
+            );
             if (result === JobTypes.ABORT) return;
         }
 
@@ -71,10 +68,9 @@ export class JobRunnerService {
         //Clear Cache jobs will clean up the cache when it is no longer needed.
         //If another job is attempted after the clear was called, it must first call an init job
         if (job.jobType === JobTypes.CLEAR_CACHE) {
-            const result: JobResult =
-                await this.clearCacheService.clearCacheJob(
-                    job as CacheClearJobListing,
-                );
+            const result: JobResult = await this.clearCacheService.clearCacheJob(
+                job as CacheClearJobListing,
+            );
             if (result === JobTypes.ABORT) return;
         }
     }

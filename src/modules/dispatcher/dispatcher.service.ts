@@ -28,24 +28,13 @@ export class DispatcherService {
         outSize: number,
         minScore: number,
     ): ConcurrentBatch[] {
-        strictEqual(
-            outSize > 0,
-            true,
-            'dispatchConcurrentPosts -> outSize must be > 0',
-        );
+        strictEqual(outSize > 0, true, 'dispatchConcurrentPosts -> outSize must be > 0');
 
-        strictEqual(
-            minScore >= 0,
-            true,
-            'dispatchConcurrentPosts -> minScore must be >= 0',
-        );
+        strictEqual(minScore >= 0, true, 'dispatchConcurrentPosts -> minScore must be >= 0');
 
         //calculates the number of batches that should be dispatched to optimally calculate this data
         const inSize = rawPool.length;
-        const batchCount = this.tlineCalculatorService.calculateBatchCount(
-            inSize,
-            outSize,
-        );
+        const batchCount = this.tlineCalculatorService.calculateBatchCount(inSize, outSize);
         //In the event of data overload, failsafe. If the batch count is too large
         //or somehow greater than the input size, fail gracefully
         if (batchCount > inSize || batchCount > 50) {
@@ -77,11 +66,7 @@ export class DispatcherService {
 
         //This for loop processes all the batches, filling them with the required post size
         //handling any of the overflow posts and finally dispatching the job to the jobBuilder
-        for (
-            let batchesProcessed = 0;
-            batchesProcessed < batchCount;
-            batchesProcessed++
-        ) {
+        for (let batchesProcessed = 0; batchesProcessed < batchCount; batchesProcessed++) {
             const jobBatch: RawPost[] = [];
 
             //add the next actualBatchSize posts to the batch. This is the calculated size of each batch
@@ -94,14 +79,11 @@ export class DispatcherService {
             //if we add one overflow post per batch, we will evenly distribute them as best we can
             //and so we can take the overflow posts from the end. This takes one per batch for every
             //leftover post, so while the number leftover is greater than the number processed, add one more
-            if (leftover > batchesProcessed)
-                jobBatch.push(rawPool[inSize - batchesProcessed - 1]);
+            if (leftover > batchesProcessed) jobBatch.push(rawPool[inSize - batchesProcessed - 1]);
 
             //we can then dispatch the job to the batch calculator, and push the promised calculation
             //to the job builder so that the JobRunner can pick them up and process them later
-            jobBuilder.push(
-                this.batchCalculatorService.batchCalculate(jobBatch, minScore),
-            );
+            jobBuilder.push(this.batchCalculatorService.batchCalculate(jobBatch, minScore));
         }
 
         return jobBuilder;

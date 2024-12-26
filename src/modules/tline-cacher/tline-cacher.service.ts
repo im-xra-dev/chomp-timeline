@@ -6,11 +6,7 @@ export class TlineCacherService {
     //TODO: interacts with redis
     //TODO mutex, parse, run, errors, return
 
-    async dispatch(
-        mode: Q,
-        params: { [key: string]: string },
-        data?: unknown,
-    ): Promise<unknown> {
+    async dispatch(mode: Q, params: { [key: string]: string }, data?: unknown): Promise<unknown> {
         return null;
     }
 

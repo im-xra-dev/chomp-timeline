@@ -36,12 +36,8 @@ describe('DispatcherService', () => {
         }).compile();
 
         service = module.get<DispatcherService>(DispatcherService);
-        tLineCalculatorService = module.get<TLineCalculatorService>(
-            TLineCalculatorService,
-        );
-        batchCalculatorService = module.get<BatchCalculatorService>(
-            BatchCalculatorService,
-        );
+        tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
+        batchCalculatorService = module.get<BatchCalculatorService>(BatchCalculatorService);
     });
 
     it('should be defined', () => {
@@ -58,14 +54,8 @@ describe('DispatcherService', () => {
 
             const testData: RawPost[][] = [];
 
-            jest.spyOn(
-                tLineCalculatorService,
-                'calculateBatchCount',
-            ).mockReturnValue(BATCH_COUNT);
-            jest.spyOn(
-                batchCalculatorService,
-                'batchCalculate',
-            ).mockImplementation(
+            jest.spyOn(tLineCalculatorService, 'calculateBatchCount').mockReturnValue(BATCH_COUNT);
+            jest.spyOn(batchCalculatorService, 'batchCalculate').mockImplementation(
                 async (test: RawPost[]): Promise<SortedPost[]> => {
                     testData.push(test);
                     return [];
@@ -74,8 +64,7 @@ describe('DispatcherService', () => {
 
             //populate the test data
             const inputPosts: RawPost[] = [];
-            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++)
-                inputPosts.push(getRaw(inCnt));
+            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++) inputPosts.push(getRaw(inCnt));
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
@@ -87,8 +76,7 @@ describe('DispatcherService', () => {
             //expects the first batch to contain 14 posts
             expect(testData[0].length).toBe(POST_COUNT);
             //check they are in the correct order
-            for (let i = 0; i < POST_COUNT; i++)
-                expect(testData[0][i].id).toBe('MOCK' + i);
+            for (let i = 0; i < POST_COUNT; i++) expect(testData[0][i].id).toBe('MOCK' + i);
         });
 
         it('should dispatch posts evenly across multiple batches', () => {
@@ -102,14 +90,8 @@ describe('DispatcherService', () => {
 
             const testData: RawPost[][] = [];
 
-            jest.spyOn(
-                tLineCalculatorService,
-                'calculateBatchCount',
-            ).mockReturnValue(BATCH_COUNT);
-            jest.spyOn(
-                batchCalculatorService,
-                'batchCalculate',
-            ).mockImplementation(
+            jest.spyOn(tLineCalculatorService, 'calculateBatchCount').mockReturnValue(BATCH_COUNT);
+            jest.spyOn(batchCalculatorService, 'batchCalculate').mockImplementation(
                 async (test: RawPost[]): Promise<SortedPost[]> => {
                     testData.push(test);
                     return [];
@@ -118,8 +100,7 @@ describe('DispatcherService', () => {
 
             //populate the test data
             const inputPosts: RawPost[] = [];
-            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++)
-                inputPosts.push(getRaw(inCnt));
+            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++) inputPosts.push(getRaw(inCnt));
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
@@ -132,8 +113,7 @@ describe('DispatcherService', () => {
             expect(testData[0].length).toBe(POSTS_PER_BATCH);
 
             //check the first batch is in the correct order
-            for (let i = 0; i < POSTS_PER_BATCH; i++)
-                expect(testData[0][i].id).toBe('MOCK' + i);
+            for (let i = 0; i < POSTS_PER_BATCH; i++) expect(testData[0][i].id).toBe('MOCK' + i);
 
             //expects the second batch to contain 7 posts
             expect(testData[1].length).toBe(POSTS_PER_BATCH);
@@ -161,14 +141,8 @@ describe('DispatcherService', () => {
 
             const testData: RawPost[][] = [];
 
-            jest.spyOn(
-                tLineCalculatorService,
-                'calculateBatchCount',
-            ).mockReturnValue(BATCH_COUNT);
-            jest.spyOn(
-                batchCalculatorService,
-                'batchCalculate',
-            ).mockImplementation(
+            jest.spyOn(tLineCalculatorService, 'calculateBatchCount').mockReturnValue(BATCH_COUNT);
+            jest.spyOn(batchCalculatorService, 'batchCalculate').mockImplementation(
                 async (test: RawPost[]): Promise<SortedPost[]> => {
                     testData.push(test);
                     return [];
@@ -177,8 +151,7 @@ describe('DispatcherService', () => {
 
             //populate the test data
             const inputPosts: RawPost[] = [];
-            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++)
-                inputPosts.push(getRaw(inCnt));
+            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++) inputPosts.push(getRaw(inCnt));
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
@@ -191,13 +164,10 @@ describe('DispatcherService', () => {
             expect(testData[0].length).toBe(POSTS_PER_BATCH + 1);
 
             //check the first batch 7 posts in batch 1 are in the correct order
-            for (let i = 0; i < POSTS_PER_BATCH; i++)
-                expect(testData[0][i].id).toBe('MOCK' + i);
+            for (let i = 0; i < POSTS_PER_BATCH; i++) expect(testData[0][i].id).toBe('MOCK' + i);
 
             //check that the last item was an overflow taken from the end
-            expect(testData[0][POSTS_PER_BATCH].id).toBe(
-                'MOCK' + (POST_COUNT - 1),
-            );
+            expect(testData[0][POSTS_PER_BATCH].id).toBe('MOCK' + (POST_COUNT - 1));
 
             //expects the second batch to contain 7 posts
             expect(testData[1].length).toBe(POSTS_PER_BATCH);
@@ -224,14 +194,8 @@ describe('DispatcherService', () => {
 
             const testData: RawPost[][] = [];
 
-            jest.spyOn(
-                tLineCalculatorService,
-                'calculateBatchCount',
-            ).mockReturnValue(BATCH_COUNT);
-            jest.spyOn(
-                batchCalculatorService,
-                'batchCalculate',
-            ).mockImplementation(
+            jest.spyOn(tLineCalculatorService, 'calculateBatchCount').mockReturnValue(BATCH_COUNT);
+            jest.spyOn(batchCalculatorService, 'batchCalculate').mockImplementation(
                 async (test: RawPost[]): Promise<SortedPost[]> => {
                     testData.push(test);
                     return [];
@@ -240,8 +204,7 @@ describe('DispatcherService', () => {
 
             //populate the test data
             const inputPosts: RawPost[] = [];
-            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++)
-                inputPosts.push(getRaw(inCnt));
+            for (let inCnt = 0; inCnt < POST_COUNT; inCnt++) inputPosts.push(getRaw(inCnt));
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
@@ -262,9 +225,7 @@ describe('DispatcherService', () => {
             //from the original inputPosts
 
             for (let i = 0; i < OVERFLOWS; i++) {
-                expect(testData[i][POSTS_PER_BATCH].id).toBe(
-                    `MOCK${POST_COUNT - i - 1}`,
-                );
+                expect(testData[i][POSTS_PER_BATCH].id).toBe(`MOCK${POST_COUNT - i - 1}`);
             }
         });
     });

@@ -16,11 +16,7 @@ export class TLineCalculatorService {
      * @param secsAvailable
      */
     calculateSectionsToQuery(postSlots: number, secsAvailable: number): number {
-        strictEqual(
-            postSlots <= 0,
-            false,
-            'calculateSectionsToQuery -> postSlots must be > 0',
-        );
+        strictEqual(postSlots <= 0, false, 'calculateSectionsToQuery -> postSlots must be > 0');
         strictEqual(
             secsAvailable <= 0,
             false,
@@ -59,22 +55,11 @@ export class TLineCalculatorService {
      * @param outputSize
      */
     calculateBatchCount(inputSize: number, outputSize: number): number {
-        strictEqual(
-            inputSize <= 0,
-            false,
-            'calculateBatchCount -> inputSize must be > 0',
-        );
-        strictEqual(
-            outputSize <= 0,
-            false,
-            'calculateBatchCount -> outputSize must be > 0',
-        );
+        strictEqual(inputSize <= 0, false, 'calculateBatchCount -> inputSize must be > 0');
+        strictEqual(outputSize <= 0, false, 'calculateBatchCount -> outputSize must be > 0');
 
         //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
-        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(
-            inputSize,
-            outputSize,
-        );
+        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
         return Math.ceil(idealBatchCount);
     }
 
@@ -131,11 +116,7 @@ export class TLineCalculatorService {
      * @param seen
      */
     calculateTotalSeenWeight(score: number, seen: number): number {
-        strictEqual(
-            seen < 0,
-            false,
-            'calculateTotalSeenWeight -> seen must be > 0',
-        );
+        strictEqual(seen < 0, false, 'calculateTotalSeenWeight -> seen must be > 0');
 
         const weight = this.C.F_SEEN_WEIGHT(seen);
         return score * weight;

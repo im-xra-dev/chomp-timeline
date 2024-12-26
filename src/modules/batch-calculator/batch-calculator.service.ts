@@ -23,15 +23,8 @@ export class BatchCalculatorService {
      * @param batch
      * @param rejectScore
      */
-    async batchCalculate(
-        batch: readonly RawPost[],
-        rejectScore: number,
-    ): Promise<SortedPost[]> {
-        strictEqual(
-            rejectScore >= 0,
-            true,
-            'batchCalculate -> rejectScore must be >= 0',
-        );
+    async batchCalculate(batch: readonly RawPost[], rejectScore: number): Promise<SortedPost[]> {
+        strictEqual(rejectScore >= 0, true, 'batchCalculate -> rejectScore must be >= 0');
 
         //The batch size should never be 0 so long as the total batches is <= total inputs
         //though this case should never occur, returning an empty array provides an elegant failsafe
@@ -55,29 +48,24 @@ export class BatchCalculatorService {
         for (let i = 0; i < batch.length; i++) {
             const P = batch[i];
             //calculate the raw score for this post
-            const rawScore: number =
-                this.tlineCalculatorService.calculateRelevanceScore(
-                    P.secRelationalScore,
-                    P.postPersonalScore,
-                    P.authorsPersonalScore,
-                    P.thrRelationalScore,
-                    P.autRelation,
-                    P.postState,
-                );
+            const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
+                P.secRelationalScore,
+                P.postPersonalScore,
+                P.authorsPersonalScore,
+                P.thrRelationalScore,
+                P.autRelation,
+                P.postState,
+            );
             if (rawScore <= rejectScore) continue; //reject post
 
             const sec = P.sec;
             //calculate the weighted score based on how many have been seen from this category
             //this is to create variation in the feed so the same category doesnt come up many times in a row
-            const seen: number = await this.getCachedSeenCount(
-                seenDataLocalCacheRef,
-                sec,
+            const seen: number = await this.getCachedSeenCount(seenDataLocalCacheRef, sec);
+            const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
+                rawScore,
+                seen,
             );
-            const weightScore: number =
-                this.tlineCalculatorService.calculateTotalSeenWeight(
-                    rawScore,
-                    seen,
-                );
             if (weightScore <= rejectScore) continue; //reject post
 
             //sort the un-rejected post
@@ -97,10 +85,7 @@ export class BatchCalculatorService {
     //util: interfaces with the caches to figure out how many posts from 'sec' have been marked as seen
     // it first checks its local cache in seenDataRef.
     // if it does not exist locally, it queries from redis and writes it into the local cache (default to 0 if not found)
-    async getCachedSeenCount(
-        seenDataRef: LocalCacheLookup,
-        sec: string,
-    ): Promise<number> {
+    async getCachedSeenCount(seenDataRef: LocalCacheLookup, sec: string): Promise<number> {
         //return locally cached value if it exists
         if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
 
@@ -126,10 +111,7 @@ export class BatchCalculatorService {
     //util: sorts an individual post in to the already sorted array
     // worst case: O(n) if postToInsert has largest score
     // best case: O(1) if postToInsert has lowest score
-    sortHighToLow(
-        sortedInputRef: SortedPost[],
-        postToInsert: SortedPost,
-    ): void {
+    sortHighToLow(sortedInputRef: SortedPost[], postToInsert: SortedPost): void {
         //start at the end and shift each item over by 1
         // when it finds where the new item should go, insert it and ignore the rest (as theryre already sorted)
         for (let i = sortedInputRef.length - 1; i >= 0; i--) {

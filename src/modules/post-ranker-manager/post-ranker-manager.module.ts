@@ -8,11 +8,6 @@ import { BatchProcessorModule } from '../batch-processor/batch-processor.module'
 @Module({
     providers: [PostRankerManagerService],
     exports: [PostRankerManagerService],
-    imports: [
-        TlineCacherModule,
-        QueryPoolModule,
-        DispatcherModule,
-        BatchProcessorModule,
-    ],
+    imports: [TlineCacherModule, QueryPoolModule, DispatcherModule, BatchProcessorModule],
 })
 export class PostRankerManagerModule {}

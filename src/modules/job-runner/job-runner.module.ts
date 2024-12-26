@@ -8,11 +8,6 @@ import { PostRankerManagerModule } from '../post-ranker-manager/post-ranker-mana
 @Module({
     providers: [JobRunnerService],
     exports: [JobRunnerService],
-    imports: [
-        ClearCacheModule,
-        InitCacheModule,
-        LoadNextPostsModule,
-        PostRankerManagerModule,
-    ],
+    imports: [ClearCacheModule, InitCacheModule, LoadNextPostsModule, PostRankerManagerModule],
 })
 export class JobRunnerModule {}

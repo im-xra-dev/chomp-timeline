@@ -56,11 +56,8 @@ describe('JobRunnerService', () => {
 
         service = module.get<JobRunnerService>(JobRunnerService);
         initCacheService = module.get<InitCacheService>(InitCacheService);
-        postRankerManagerService = module.get<PostRankerManagerService>(
-            PostRankerManagerService,
-        );
-        loadNextPostsService =
-            module.get<LoadNextPostsService>(LoadNextPostsService);
+        postRankerManagerService = module.get<PostRankerManagerService>(PostRankerManagerService);
+        loadNextPostsService = module.get<LoadNextPostsService>(LoadNextPostsService);
         clearCacheService = module.get<ClearCacheService>(ClearCacheService);
     });
 
@@ -89,23 +86,15 @@ describe('JobRunnerService', () => {
         //it was called). it is used to ensure one function is called after another.
         //I could have used jest-extended but i didnt want to install a whole package
         //just to run this test that I can do without it anyway
-        const getInvocationOrder = (s: {
-            mock: { invocationCallOrder: number[] };
-        }): number => {
+        const getInvocationOrder = (s: { mock: { invocationCallOrder: number[] } }): number => {
             return s.mock.invocationCallOrder[0];
         };
 
         it('should call init, query and load, in that order, for a successful init job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockResolvedValue(JobTypes.CONTINUE);
             queryJobMock.mockResolvedValue(JobTypes.CONTINUE);
@@ -138,15 +127,9 @@ describe('JobRunnerService', () => {
 
         it('should call only init for an aborted init job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockResolvedValue(JobTypes.ABORT);
             queryJobMock.mockImplementation(FAIL_IF_CALLED);
@@ -171,15 +154,9 @@ describe('JobRunnerService', () => {
 
         it('should call query and load, in that order, for a query and load job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockImplementation(FAIL_IF_CALLED);
             queryJobMock.mockResolvedValue(JobTypes.CONTINUE);
@@ -208,15 +185,9 @@ describe('JobRunnerService', () => {
 
         it('should call only query for an aborted query and load job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockImplementation(FAIL_IF_CALLED);
             queryJobMock.mockResolvedValue(JobTypes.ABORT);
@@ -241,15 +212,9 @@ describe('JobRunnerService', () => {
 
         it('should call only query for a query job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockImplementation(FAIL_IF_CALLED);
             queryJobMock.mockResolvedValue(JobTypes.CONTINUE);
@@ -273,15 +238,9 @@ describe('JobRunnerService', () => {
 
         it('should call only load for a load job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockImplementation(FAIL_IF_CALLED);
             queryJobMock.mockImplementation(FAIL_IF_CALLED);
@@ -304,15 +263,9 @@ describe('JobRunnerService', () => {
 
         it('should call only clear cache for a clear cache job', async () => {
             const initJobMock = jest.spyOn(initCacheService, 'initJob');
-            const queryJobMock = jest.spyOn(
-                postRankerManagerService,
-                'queryJob',
-            );
+            const queryJobMock = jest.spyOn(postRankerManagerService, 'queryJob');
             const loadJobMock = jest.spyOn(loadNextPostsService, 'loadJob');
-            const clearCacheJobMock = jest.spyOn(
-                clearCacheService,
-                'clearCacheJob',
-            );
+            const clearCacheJobMock = jest.spyOn(clearCacheService, 'clearCacheJob');
 
             initJobMock.mockImplementation(FAIL_IF_CALLED);
             queryJobMock.mockImplementation(FAIL_IF_CALLED);

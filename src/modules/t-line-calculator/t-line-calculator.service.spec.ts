@@ -20,9 +20,7 @@ describe('TLineCalculatorService', () => {
         }).compile();
 
         service = module.get<TLineCalculatorService>(TLineCalculatorService);
-        configService = module.get<TLineCalculatorConfigService>(
-            TLineCalculatorConfigService,
-        );
+        configService = module.get<TLineCalculatorConfigService>(TLineCalculatorConfigService);
     });
 
     it('should be defined', () => {
@@ -173,8 +171,10 @@ describe('TLineCalculatorService', () => {
             //then all available sections must be queried
 
             const totalAvailableSections = 5;
-            const moreThanThreeSlotsPerSection =
-                service.calculateSectionsToQuery(10000, totalAvailableSections);
+            const moreThanThreeSlotsPerSection = service.calculateSectionsToQuery(
+                10000,
+                totalAvailableSections,
+            );
 
             expect(moreThanThreeSlotsPerSection).toBe(totalAvailableSections);
         });
@@ -196,9 +196,7 @@ describe('TLineCalculatorService', () => {
 
     describe('calculateBatchCount', () => {
         it('should be an equation that produces an optimised batch count', () => {
-            expect(
-                'the developer to have graphs that back this up',
-            ).toBeTruthy();
+            expect('the developer to have graphs that back this up').toBeTruthy();
             // current tests for the equation outputs are in desmos and on paper [~xra 25/11/24]
         });
 

@@ -40,9 +40,7 @@ describe('PostRankerManagerService', () => {
             ],
         }).compile();
 
-        service = module.get<PostRankerManagerService>(
-            PostRankerManagerService,
-        );
+        service = module.get<PostRankerManagerService>(PostRankerManagerService);
     });
 
     it('should be defined', () => {
