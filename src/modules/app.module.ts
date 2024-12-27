@@ -7,6 +7,7 @@ import { QueryPoolModule } from './query-pool/query-pool.module';
 import { ClearCacheModule } from './clear-cache/clear-cache.module';
 import { InitCacheModule } from './init-cache/init-cache.module';
 import { LoadNextPostsModule } from './load-next-posts/load-next-posts.module';
+import { NeoDriverModule } from './neo-driver/neo-driver.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { LoadNextPostsModule } from './load-next-posts/load-next-posts.module';
         ClearCacheModule,
         InitCacheModule,
         LoadNextPostsModule,
+        NeoDriverModule,
     ],
 })
 export class AppModule {}
