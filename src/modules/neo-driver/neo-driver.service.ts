@@ -9,7 +9,7 @@ export class NeoDriverService {
 
     constructor(private readonly configService: ConfigService) {}
 
-    /**bootup
+    /** bootup
      *
      * boot up the driver
      */
@@ -40,6 +40,9 @@ export class NeoDriverService {
     /** getSession
      *
      * Gets a new session instance from the driver
+     * if current driver is undefined, then attempt to boot a new one, throwing an
+     * error if it fails
+     *
      */
     async getSession(): Promise<Session> {
         if (!this.driverInstance) {
@@ -49,7 +52,7 @@ export class NeoDriverService {
         return this.driverInstance.session();
     }
 
-    /**close
+    /** close
      *
      * close the current driver instance
      */
