@@ -3,7 +3,7 @@ import { NeoDriverService } from '../neo-driver/neo-driver.service';
 
 @Injectable()
 export class NeoQueryService {
-    constructor(private neoDriverModule: NeoDriverService) {}
+    constructor(private neoDriverService: NeoDriverService) {}
 
     read(query: string): unknown {
         return null;
