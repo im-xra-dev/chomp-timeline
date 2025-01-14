@@ -17,3 +17,6 @@
 
 ## Data flow
 [Read about the flow of data through the system](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/data-flow.md)
+
+## Data storage
+[Read about the storage of data in neo](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/neo.md)
