@@ -47,7 +47,7 @@ _Attributes_
 
 ### Recipe
 
-Each recipe is a subtype of a post. It contains the attributes and relationships of the Post nodes, as well as
+Each recipe is a subtype of a post. It contains the attributes and relationships of the Post nodes.
 
 _Attributes_
 
