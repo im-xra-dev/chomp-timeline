@@ -4,6 +4,11 @@ The neo4j database contains the information required for determining relevant co
 Content provided includes posts in the users feed, recipes in the users meal plans, as well as 
 recommendations for posts, users, bites and recipes that the user may be interested in.
 
+This image contains an example of what part of the graph may look like, below it is details on what 
+each node and relationship means and what data may be stored along side it as attributes.
+
+![Example Graph](https://github.com/im-xra-dev/chomp-timeline/raw/main/docs/neo.png)
+
 ## nodes
 
 To determine this information, nodes for the following data are stored in the database:
@@ -103,6 +108,10 @@ _Attributes_
 
 - score: number
 
+### Authored
+
+Connects a user node to a post or recipe node to denote that they are the owner
+
 ### SeenState
 
 This is a post that the user has already viewed. It stores both vote and view data.
@@ -119,5 +128,13 @@ to try at some point
 
 _Attributes_
 
-- favourite: boolean
+- rating: number 1-5 to rank recipes in more detail
 - tryit: boolean
+
+### TagScore
+
+This is used to calculate the most commonly voted tags, to provide more relevant options in the generation screen
+
+_Attributes_
+
+- score: number
