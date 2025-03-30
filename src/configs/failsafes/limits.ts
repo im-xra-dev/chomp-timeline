@@ -1,0 +1,2 @@
+export const FAILSAFE_BATCH_SIZE = 1000;
+export const FAILSAFE_BATCH_COUNT = 50;

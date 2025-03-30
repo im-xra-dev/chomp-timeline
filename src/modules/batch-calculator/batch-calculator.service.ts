@@ -4,6 +4,7 @@ import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
 import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
 import { TLineCacheQueriesEnum } from '../../utils/TLineCacheQueriesEnum';
 import { RawPost, SortedPost } from '../../utils/types';
+import {FAILSAFE_BATCH_SIZE} from '../../configs/failsafes/limits'
 
 type LocalCacheLookup = { [sec: string]: number };
 
@@ -32,7 +33,7 @@ export class BatchCalculatorService {
 
         //In the event of data overload, failsafe. This case handles both the for loop below, and
         //the sorting for loop, as both are bound by the batch length.
-        if (batch.length > 1000) {
+        if (batch.length > FAILSAFE_BATCH_SIZE) {
             console.error({
                 batchLength: batch.length,
                 message: 'failsafe triggered >> batchCalculate',

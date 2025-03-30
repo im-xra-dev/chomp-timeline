@@ -3,6 +3,7 @@ import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.s
 import { BatchCalculatorService } from '../batch-calculator/batch-calculator.service';
 import { RawPost, ConcurrentBatch } from '../../utils/types';
 import { strictEqual } from 'assert';
+import {FAILSAFE_BATCH_SIZE, FAILSAFE_BATCH_COUNT} from '../../configs/failsafes/limits'
 
 @Injectable()
 export class DispatcherService {
@@ -37,7 +38,7 @@ export class DispatcherService {
         const batchCount = this.tlineCalculatorService.calculateBatchCount(inSize, outSize);
         //In the event of data overload, failsafe. If the batch count is too large
         //or somehow greater than the input size, fail gracefully
-        if (batchCount > inSize || batchCount > 50) {
+        if (batchCount > inSize || batchCount > FAILSAFE_BATCH_COUNT) {
             console.error({
                 batchCount,
                 inSize,
@@ -49,7 +50,7 @@ export class DispatcherService {
         //based on the number of batches to dispatch, calculate how many posts should fit in each
         const actualBatchSize = Math.floor(inSize / batchCount);
         //In the event of data overload, failsafe. If the actualBatchSize is too large, fail gracefully
-        if (actualBatchSize > 1000) {
+        if (actualBatchSize > FAILSAFE_BATCH_SIZE) {
             console.error({
                 actualBatchSize,
                 batchCount,
