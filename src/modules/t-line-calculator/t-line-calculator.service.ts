@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
-import { PostState, UserRelation } from '../../utils/types';
+import { PostState, RawPost, UserRelation } from '../../utils/types';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
@@ -68,42 +68,32 @@ export class TLineCalculatorService {
      * Relational Score - a score based on the relation between the requesting user and the specified node
      * Personal Score - a score based on an individual node
      *
-     * @param secRelationalScore
-     * @param postPersonalScore
-     * @param authorsPersonalScore
-     * @param thrRelationalScore
-     * @param autRelation
-     * @param postState
+     * @param rawPost
      */
-    calculateRelevanceScore(
-        secRelationalScore: number,
-        postPersonalScore: number,
-        authorsPersonalScore: number,
-        thrRelationalScore: number,
-        autRelation: UserRelation,
-        postState: PostState,
-    ): number {
+    calculateRelevanceScore(rawPost: RawPost): number {
         //negative scores are rejected
-        if (autRelation.muted) return -1;
+        const IRRELEVANT_CONTENT_SCORE = -1;
+
+        if (rawPost.autRelation.muted) return IRRELEVANT_CONTENT_SCORE;
 
         //followed authors get a score boost
         const authorRelationalScore = this.conditionalWeight(
-            autRelation.follows,
-            autRelation.score,
+            rawPost.autRelation.follows,
+            rawPost.autRelation.score,
             this.C.C_FOLLOW_BOOST,
         );
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
-            this.weighted(secRelationalScore, this.C.SW_SEC_REL) +
-                this.weighted(authorsPersonalScore, this.C.SW_AUTHOR_PER) +
+            this.weighted(rawPost.secRelationalScore, this.C.SW_SEC_REL) +
+                this.weighted(rawPost.authorsPersonalScore, this.C.SW_AUTHOR_PER) +
                 this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL) +
-                this.weighted(thrRelationalScore, this.C.SW_THREAD_REL) +
-                this.weighted(postPersonalScore, this.C.SW_POST_PER),
+                this.weighted(rawPost.thrRelationalScore, this.C.SW_THREAD_REL) +
+                this.weighted(rawPost.postPersonalScore, this.C.SW_POST_PER),
             this.C.W_CALCULATED,
         );
-        //viewed posts are weighted (by how much depends on view context
-        if (postState.seen) return score * postState.weight;
+        //viewed posts are weighted (by how much depends on view context)
+        if (rawPost.postState.seen) return score * rawPost.postState.weight;
         return score;
     }
 

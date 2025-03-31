@@ -4,7 +4,11 @@ import { TlineCacherService } from '../tline-cacher/tline-cacher.service';
 import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
 import { TLineCacheQueriesEnum } from '../../utils/TLineCacheQueriesEnum';
 import { RawPost, SortedPost } from '../../utils/types';
-import {FAILSAFE_BATCH_SIZE} from '../../configs/failsafes/limits'
+import {
+    failsafe,
+    FAILSAFE_BATCH_COUNT,
+    FAILSAFE_BATCH_SIZE,
+} from '../../configs/failsafes/limits';
 
 type LocalCacheLookup = { [sec: string]: number };
 
@@ -33,13 +37,7 @@ export class BatchCalculatorService {
 
         //In the event of data overload, failsafe. This case handles both the for loop below, and
         //the sorting for loop, as both are bound by the batch length.
-        if (batch.length > FAILSAFE_BATCH_SIZE) {
-            console.error({
-                batchLength: batch.length,
-                message: 'failsafe triggered >> batchCalculate',
-            });
-            return [];
-        }
+        failsafe(batch.length > FAILSAFE_BATCH_SIZE, { batchLength: batch.length });
 
         const seenDataLocalCacheRef: LocalCacheLookup = {};
         const sortedDataRef: SortedPost[] = [];
@@ -47,46 +45,55 @@ export class BatchCalculatorService {
         //calculate scores for all posts in batch and sort them from best to worst
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
         for (let i = 0; i < batch.length; i++) {
-            const P = batch[i];
-            //calculate the raw score for this post
-            const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
-                P.secRelationalScore,
-                P.postPersonalScore,
-                P.authorsPersonalScore,
-                P.thrRelationalScore,
-                P.autRelation,
-                P.postState,
+            await this.processPost_mutatesSeenCacheAndSortedList(
+                sortedDataRef,
+                seenDataLocalCacheRef,
+                batch[i],
+                rejectScore,
             );
-            if (rawScore <= rejectScore) continue; //reject post
-
-            const sec = P.sec;
-            //calculate the weighted score based on how many have been seen from this category
-            //this is to create variation in the feed so the same category doesnt come up many times in a row
-            const seen: number = await this.getCachedSeenCount(seenDataLocalCacheRef, sec);
-            const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
-                rawScore,
-                seen,
-            );
-            if (weightScore <= rejectScore) continue; //reject post
-
-            //sort the un-rejected post
-            this.sortHighToLow(sortedDataRef, {
-                id: P.id,
-                sec: sec,
-                score: weightScore,
-                seen: P.postState.seen,
-                vote: P.postState.vote,
-            });
-            seenDataLocalCacheRef[sec]++;
         }
 
         return sortedDataRef;
     }
 
+    //util: processes the individual post
+    // this function handles the calculation of weights, rejection and insertion of an individual post
+    private async processPost_mutatesSeenCacheAndSortedList(
+        sortedDataRef: SortedPost[],
+        seenDataLocalCacheRef: LocalCacheLookup,
+        rawPost: RawPost,
+        rejectScore: number,
+    ) {
+        //calculate the raw score for this post
+        const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(rawPost);
+        if (rawScore <= rejectScore) return; //reject post
+
+        //get total posts from this category that have been seen
+        const seen: number = await this.getOrInitializeCachedSeenCount(
+            seenDataLocalCacheRef,
+            rawPost.sec,
+        );
+
+        //calculate the weighted score based on how many have been seen from this category
+        //this is to create variation in the feed so the same category doesnt come up many times in a row
+        const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
+            rawScore,
+            seen,
+        );
+        if (weightScore <= rejectScore) return; //reject post
+
+        //sort the un-rejected post and update seen cache
+        this.insertPostInPlaceHighToLow(sortedDataRef, rawPost, weightScore);
+        seenDataLocalCacheRef[rawPost.sec]++;
+    }
+
     //util: interfaces with the caches to figure out how many posts from 'sec' have been marked as seen
     // it first checks its local cache in seenDataRef.
     // if it does not exist locally, it queries from redis and writes it into the local cache (default to 0 if not found)
-    async getCachedSeenCount(seenDataRef: LocalCacheLookup, sec: string): Promise<number> {
+    async getOrInitializeCachedSeenCount(
+        seenDataRef: LocalCacheLookup,
+        sec: string,
+    ): Promise<number> {
         //return locally cached value if it exists
         if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
 
@@ -112,7 +119,19 @@ export class BatchCalculatorService {
     //util: sorts an individual post in to the already sorted array
     // worst case: O(n) if postToInsert has largest score
     // best case: O(1) if postToInsert has lowest score
-    sortHighToLow(sortedInputRef: SortedPost[], postToInsert: SortedPost): void {
+    insertPostInPlaceHighToLow(
+        sortedInputRef: SortedPost[],
+        rawPost: RawPost,
+        weightScore: number,
+    ): void {
+        const postToInsert: SortedPost = {
+            id: rawPost.id,
+            sec: rawPost.sec,
+            score: weightScore,
+            seen: rawPost.postState.seen,
+            vote: rawPost.postState.vote,
+        };
+
         //start at the end and shift each item over by 1
         // when it finds where the new item should go, insert it and ignore the rest (as theryre already sorted)
         for (let i = sortedInputRef.length - 1; i >= 0; i--) {
