@@ -32,7 +32,7 @@ export class DispatcherService {
         rawPool: readonly RawPost[],
         outSize: number,
         minScore: number,
-    ): ConcurrentBatch[] {
+    ): Promise<readonly SortedPost[]>[] {
         strictEqual(outSize > 0, true, 'dispatchConcurrentPosts -> outSize must be > 0');
 
         strictEqual(minScore >= 0, true, 'dispatchConcurrentPosts -> minScore must be >= 0');

@@ -179,6 +179,12 @@ Abbreviations should be avoided, unless it is explicitly clear what it means (eg
 > suffix `Ref` to indicate clearly that this data is passed by reference. This should ideally be limited to
 > only being passed to helper functions in the same file.
 
+> **Mutators**
+> 
+> Functions that mutate a parameter from a higher scope should be clearly marked as a mutation function.
+> This can either be done by using a key word such as "Insert", "Initialize" etc, or when this is not appropriate,
+> should contain `_mutateAttribute` as a suffix eg `processPost_mutatesSeenCacheAndSortedList`
+
 ### Order of data definitions
 
 Order parameters by importance. Parameters should not be mutated, any objects or lists should be annotated

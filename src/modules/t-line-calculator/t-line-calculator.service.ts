@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
-import { PostState, RawPost, UserRelation } from '../../utils/types';
+import { RawPost } from '../../utils/types';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
 export class TLineCalculatorService {
-    constructor(private readonly C: TLineCalculatorConfigService) {}
+    constructor(private readonly config: TLineCalculatorConfigService) {}
 
     /**Calculate how many section to query to build the data
      *
@@ -23,7 +23,7 @@ export class TLineCalculatorService {
             'calculateSectionsToQuery -> secsAvailable must be > 0',
         );
 
-        const ideal = Math.ceil(postSlots / this.C.C_IDEAL_POSTS_PER_SEC);
+        const ideal = Math.ceil(postSlots / this.config.C_IDEAL_POSTS_PER_SEC);
 
         return secsAvailable < ideal ? secsAvailable : ideal;
     }
@@ -59,7 +59,7 @@ export class TLineCalculatorService {
         strictEqual(outputSize <= 0, false, 'calculateBatchCount -> outputSize must be > 0');
 
         //min-point on curve is at idealBatchSize = sqrt(2c) from desmos
-        const idealBatchCount = this.C.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
+        const idealBatchCount = this.config.F_IDEAL_BATCH_COUNT(inputSize, outputSize);
         return Math.ceil(idealBatchCount);
     }
 
@@ -80,17 +80,17 @@ export class TLineCalculatorService {
         const authorRelationalScore = this.conditionalWeight(
             rawPost.autRelation.follows,
             rawPost.autRelation.score,
-            this.C.C_FOLLOW_BOOST,
+            this.config.C_FOLLOW_BOOST,
         );
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
-            this.weighted(rawPost.secRelationalScore, this.C.SW_SEC_REL) +
-                this.weighted(rawPost.authorsPersonalScore, this.C.SW_AUTHOR_PER) +
-                this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL) +
-                this.weighted(rawPost.thrRelationalScore, this.C.SW_THREAD_REL) +
-                this.weighted(rawPost.postPersonalScore, this.C.SW_POST_PER),
-            this.C.W_CALCULATED,
+            this.weighted(rawPost.secRelationalScore, this.config.SW_SEC_REL) +
+                this.weighted(rawPost.authorsPersonalScore, this.config.SW_AUTHOR_PER) +
+                this.weighted(authorRelationalScore, this.config.SW_AUTHOR_REL) +
+                this.weighted(rawPost.thrRelationalScore, this.config.SW_THREAD_REL) +
+                this.weighted(rawPost.postPersonalScore, this.config.SW_POST_PER),
+            this.config.W_CALCULATED,
         );
         //viewed posts are weighted (by how much depends on view context)
         if (rawPost.postState.seen) return score * rawPost.postState.weight;
@@ -108,13 +108,13 @@ export class TLineCalculatorService {
     calculateTotalSeenWeight(score: number, seen: number): number {
         strictEqual(seen < 0, false, 'calculateTotalSeenWeight -> seen must be > 0');
 
-        const weight = this.C.F_SEEN_WEIGHT(seen);
+        const weight = this.config.F_SEEN_WEIGHT(seen);
         return score * weight;
     }
 
     //util to normalize
     normalize(score: number): number {
-        return Math.atan(score / this.C.C_ATAN_DIVISOR);
+        return Math.atan(score / this.config.C_ATAN_DIVISOR);
     }
 
     //util to boost followed members

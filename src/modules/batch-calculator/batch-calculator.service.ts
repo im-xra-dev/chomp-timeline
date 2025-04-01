@@ -21,6 +21,8 @@ export class BatchCalculatorService {
 
     /**Calculates and ranks a batch of posts
      *
+     * Set up the processing environment for this batch
+     *
      * Worst case: O(n^2) for limited size of n
      * best case: O(n) if data is already sorted, or all posts are rejected
      * This runs concurrently to rank all the posts
@@ -39,6 +41,7 @@ export class BatchCalculatorService {
         //the sorting for loop, as both are bound by the batch length.
         failsafe(batch.length > FAILSAFE_BATCH_SIZE, { batchLength: batch.length });
 
+        //local storage for this process
         const seenDataLocalCacheRef: LocalCacheLookup = {};
         const sortedDataRef: SortedPost[] = [];
 
