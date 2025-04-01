@@ -1,6 +1,6 @@
 //functions to handle object defaults
 
-import { PostState, UserRelation } from '../../utils/types';
+import { PostState, RawPost, UserRelation } from '../../utils/types';
 import { TLineCalculatorService } from './t-line-calculator.service';
 
 /**test utility to provide default values for the attributes not being tested
@@ -69,12 +69,15 @@ export function relevanceTest(
         postState?: PostState;
     },
 ): number {
-    return service.calculateRelevanceScore(
-        secScore,
-        postScore,
-        autScore,
-        thrScore,
-        autRelation,
-        postState,
-    );
+    const rawPost: RawPost = {
+        id: '0',
+        sec: 'test',
+        secRelationalScore: secScore,
+        postPersonalScore: postScore,
+        authorsPersonalScore: autScore,
+        thrRelationalScore: thrScore,
+        autRelation: autRelation,
+        postState: postState,
+    };
+    return service.calculateRelevanceScore(rawPost);
 }
