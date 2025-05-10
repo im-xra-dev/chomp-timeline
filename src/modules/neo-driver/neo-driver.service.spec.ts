@@ -21,7 +21,7 @@ describe('NeoDriverService', () => {
     });
 
     //skipped by default as it requires a successful connection to be made
-    describe.skip('test cases against a successful connection', () => {
+    describe('test cases against a successful connection', () => {
         it('should connect to the neo4j host with .env variables', async () => {
             //run the test
             const success = await service.bootup();

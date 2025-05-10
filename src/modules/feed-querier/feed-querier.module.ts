@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { NeoQueryService } from './neo-query.service';
+import { FeedQuerier } from './feed-querier.service';
 import { NeoDriverModule } from '../neo-driver/neo-driver.module';
 
 @Module({
-    providers: [NeoQueryService],
-    exports: [NeoQueryService],
+    providers: [FeedQuerier],
+    exports: [FeedQuerier],
     imports: [NeoDriverModule],
 })
-export class NeoQueryModule {}
+export class FeedQuerierModule {}
