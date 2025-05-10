@@ -11,7 +11,7 @@ export class TLineController {
 
     @Get()
     async ping() {
-    const out = await this.test.getInteractedUsersPosts("1");
+    const out = await this.test.getSimilarBitesPosts("1");
     console.log(out.records.at(0).get("post"));
     }
 }

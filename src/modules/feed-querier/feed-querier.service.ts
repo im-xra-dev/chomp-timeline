@@ -38,7 +38,7 @@ export class FeedQuerier {
     }
 
     async getMutualBitesPosts(userId: string): Promise<QueryResult<RecordShape>> {
-        const query = `${FIND_USER} ${MATCH_MUTUAL_BITE_CHAIN} ${CALCULATE_LIKELY_USER_CANDIDATES} ${RETURN_THE_DATA}`;
+        const query = `${FIND_USER} ${MATCH_MUTUAL_BITE_CHAIN} ${CALCULATE_LIKELY_BITE_CANDIDATES} ${RETURN_THE_DATA}`;
         return await this.executeQuery(userId, query);
     }
 

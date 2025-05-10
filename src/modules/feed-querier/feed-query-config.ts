@@ -1,4 +1,4 @@
-export const FIND_USER = "MATCH (user:User) WHERE u.id=$id";
+export const FIND_USER = "MATCH (user:User) WHERE user.id=$id";
 export const RETURN_THE_DATA = "RETURN post;";
 
 //math calculations to calculate likely candidate posts
@@ -6,9 +6,9 @@ const ORDER_BY_MATH = " * interaction.score/100 + " +
     "post.score - ($now - posted.datetime)/(1000*60*10)" +
     " DESC";
 export const CALCULATE_LIKELY_USER_CANDIDATES =
-    `ORDER BY authoredUser.score + ${ORDER_BY_MATH}`;
+    `ORDER BY authoredUser.score ${ORDER_BY_MATH}`;
 export const CALCULATE_LIKELY_BITE_CANDIDATES =
-    `ORDER BY bite.score + ${ORDER_BY_MATH}`;
+    `ORDER BY bite.score ${ORDER_BY_MATH}`;
 
 //users which have been interacted with by the target user
 export const MATCH_INTERACTED_USER_CHAIN = "MATCH " +
