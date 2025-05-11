@@ -1,5 +1,5 @@
 export const FIND_USER = "MATCH (user:User) WHERE user.id=$id";
-export const RETURN_THE_DATA = "RETURN post;";
+export const RETURN_THE_DATA = "RETURN post, bite, interaction";
 
 //math calculations to calculate likely candidate posts
 const ORDER_BY_MATH = " * interaction.score/100 + " +
