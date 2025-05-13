@@ -86,7 +86,7 @@ The sorted batch is then returned which will be utilized by the Job Runner
 ### Job Runner
 The Job Runner is in charge of ensuring that the Jobs are completed and dispatching new Jobs accordingly.
 
-It is has access to the redis cache.
+It has access to the redis cache.
 
 For query jobs, it listens for the completed batches, and processes them into the pre-cache.
 
