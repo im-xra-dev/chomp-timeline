@@ -1,5 +1,5 @@
 # Data flow
-The timeline is generated in the following stages to process a large pool of potential posts down into a
+The timeline is generated in the following stages to process a large pool of candidate posts down into a
 small pool of relevant posts for the timeline.
 
 The current stage where the system is being prepared for a BETA release, breaking the system down further would be

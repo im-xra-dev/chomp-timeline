@@ -16,11 +16,19 @@ import {
     OPTIONAL_USER_INTERACT_BITE,
 } from './feed-query-config';
 import { strictEqual } from 'assert';
+import { FeedQueryError } from '../../errors/feed-query-error';
 
 @Injectable()
 export class FeedQuerier {
     constructor(private neoDriverService: NeoDriverService) {}
 
+    /** getInteractedUsersPosts
+     * Gets posts from users that "userId" interacts with
+     *
+     * @param userId
+     * @param limit
+     * @param skip
+     */
     async getInteractedUsersPosts(
         userId: string,
         limit: number,
@@ -36,6 +44,13 @@ export class FeedQuerier {
         );
     }
 
+    /** getInteractedBitesPosts
+     * Gets posts from communities that "userId" interacts with
+     *
+     * @param userId
+     * @param limit
+     * @param skip
+     */
     async getInteractedBitesPosts(
         userId: string,
         limit: number,
@@ -51,6 +66,13 @@ export class FeedQuerier {
         );
     }
 
+    /** getSimilarBitesPosts
+     * Gets the posts of a community similar to communities followed by "userId"
+     *
+     * @param userId
+     * @param limit
+     * @param skip
+     */
     async getSimilarBitesPosts(
         userId: string,
         limit: number,
@@ -66,6 +88,13 @@ export class FeedQuerier {
         );
     }
 
+    /** getMutualUsersPosts
+     * gets the posts of a user followed by a user that "userId" interacts with
+     *
+     * @param userId
+     * @param limit
+     * @param skip
+     */
     async getMutualUsersPosts(
         userId: string,
         limit: number,
@@ -81,6 +110,13 @@ export class FeedQuerier {
         );
     }
 
+    /** getMutualBitesPosts
+     * gets the posts of a community followed by a user that "userId" interacts with
+     *
+     * @param userId
+     * @param limit
+     * @param skip
+     */
     async getMutualBitesPosts(
         userId: string,
         limit: number,
@@ -130,7 +166,7 @@ export class FeedQuerier {
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error('TODO: feed-querier error');
+            throw new FeedQueryError(e, {userId, query});
         }
     }
 }
