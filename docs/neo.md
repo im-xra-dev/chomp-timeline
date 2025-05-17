@@ -120,6 +120,8 @@ The existence of this connection represents the post having been viewed.
 _Attributes_
 
 - vote: number -1 <= x <= 1
+- sess: string - session last seen in
+- seen: number - strength of the view, (no viewport, scroll past or long view)
 
 ### RecipeInteraction
 
