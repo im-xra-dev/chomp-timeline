@@ -26,17 +26,20 @@ export function getAuthorRelation({
  * @param seen
  * @param weight
  * @param vote
+ * @param sess
  */
 export function getPostState({
     seen = false,
     weight = 1,
     vote = 0,
+    sess = "sess",
 }: {
     seen?: boolean;
     weight?: number;
     vote?: number;
+    sess?: string;
 }): PostState {
-    return { seen, weight, vote };
+    return { seen, weight, vote, sess };
 }
 
 /**test utility to provide default values for the attributes not being tested

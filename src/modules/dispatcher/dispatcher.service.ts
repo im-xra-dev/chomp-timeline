@@ -22,11 +22,13 @@ export class DispatcherService {
      * @param rawPool
      * @param outSize
      * @param minScore
+     * @param userId
      */
     dispatchConcurrentPosts(
         rawPool: readonly RawPost[],
         outSize: number,
         minScore: number,
+        userId: string,
     ): ConcurrentBatch[] {
         strictEqual(outSize > 0, true, 'dispatchConcurrentPosts -> outSize must be > 0');
 
@@ -83,7 +85,7 @@ export class DispatcherService {
 
             //we can then dispatch the job to the batch calculator, and push the promised calculation
             //to the job builder so that the JobRunner can pick them up and process them later
-            jobBuilder.push(this.batchCalculatorService.batchCalculate(jobBatch, minScore));
+            jobBuilder.push(this.batchCalculatorService.batchCalculate(jobBatch, minScore, userId));
         }
 
         return jobBuilder;

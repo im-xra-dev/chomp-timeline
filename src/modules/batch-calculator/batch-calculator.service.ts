@@ -22,8 +22,9 @@ export class BatchCalculatorService {
      *
      * @param batch
      * @param rejectScore
+     * @param userId
      */
-    async batchCalculate(batch: readonly RawPost[], rejectScore: number): Promise<SortedPost[]> {
+    async batchCalculate(batch: readonly RawPost[], rejectScore: number, userId: string): Promise<SortedPost[]> {
         strictEqual(rejectScore >= 0, true, 'batchCalculate -> rejectScore must be >= 0');
 
         //The batch size should never be 0 so long as the total batches is <= total inputs
@@ -43,10 +44,18 @@ export class BatchCalculatorService {
         const seenDataLocalCacheRef: LocalCacheLookup = {};
         const sortedDataRef: SortedPost[] = [];
 
+        //TODO get session id for user userId
+        const sessId = "";
+
         //calculate scores for all posts in batch and sort them from best to worst
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
         for (let i = 0; i < batch.length; i++) {
-            const P = batch[i];
+            const P: RawPost = batch[i];
+
+            //TODO: if P.postState.sess === sessId, reject post
+
+            //TODO: if queryCache(metadata, postId) exists, reject post
+
             //calculate the raw score for this post
             const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
                 P.secRelationalScore,
@@ -61,7 +70,7 @@ export class BatchCalculatorService {
             const sec = P.sec;
             //calculate the weighted score based on how many have been seen from this category
             //this is to create variation in the feed so the same category doesnt come up many times in a row
-            const seen: number = await this.getCachedSeenCount(seenDataLocalCacheRef, sec);
+            const seen: number = await this.getCachedSeenCount(seenDataLocalCacheRef, sec, userId);
             const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
                 rawScore,
                 seen,
@@ -85,7 +94,7 @@ export class BatchCalculatorService {
     //util: interfaces with the caches to figure out how many posts from 'sec' have been marked as seen
     // it first checks its local cache in seenDataRef.
     // if it does not exist locally, it queries from redis and writes it into the local cache (default to 0 if not found)
-    async getCachedSeenCount(seenDataRef: LocalCacheLookup, sec: string): Promise<number> {
+    async getCachedSeenCount(seenDataRef: LocalCacheLookup, sec: string, userId: string): Promise<number> {
         //return locally cached value if it exists
         if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
 
@@ -93,7 +102,7 @@ export class BatchCalculatorService {
             //set the local cache value by moving the redis cached value to local cache (defaults to 0 if not exists)
             const seenCount: unknown = await this.tlineCacheService.dispatch(
                 TLineCacheQueriesEnum.GET_SEEN,
-                { sec },
+                { userId, sec },
             );
             if (seenCount === undefined) seenDataRef[sec] = 0;
             else seenDataRef[sec] = seenCount as number;

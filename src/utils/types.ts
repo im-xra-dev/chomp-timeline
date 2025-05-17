@@ -10,6 +10,7 @@ export type PostState = Readonly<{
     weight: number;
     seen: boolean;
     vote: number;
+    sess: string;
 }>;
 
 export type RawPost = Readonly<{

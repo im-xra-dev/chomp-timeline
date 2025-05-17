@@ -68,7 +68,7 @@ describe('DispatcherService', () => {
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
-            service.dispatchConcurrentPosts(inputPosts, 100, 0);
+            service.dispatchConcurrentPosts(inputPosts, 100, 0, "userId");
 
             //tests that the correct number of batches were dispatched
             expect(testData.length).toBe(BATCH_COUNT);
@@ -104,7 +104,7 @@ describe('DispatcherService', () => {
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
-            service.dispatchConcurrentPosts(inputPosts, 100, 0);
+            service.dispatchConcurrentPosts(inputPosts, 100, 0, "userId");
 
             //tests that the correct number of batches were dispatched
             expect(testData.length).toBe(BATCH_COUNT);
@@ -155,7 +155,7 @@ describe('DispatcherService', () => {
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
-            service.dispatchConcurrentPosts(inputPosts, 100, 0);
+            service.dispatchConcurrentPosts(inputPosts, 100, 0, "userId");
 
             //tests that the correct number of batches were dispatched
             expect(testData.length).toBe(BATCH_COUNT);
@@ -208,7 +208,7 @@ describe('DispatcherService', () => {
 
             //out size and minscore are irrelevant, they are passed onto other functions
             //and their values are tested accordingly within those unit tests
-            service.dispatchConcurrentPosts(inputPosts, 100, 0);
+            service.dispatchConcurrentPosts(inputPosts, 100, 0, "userId");
 
             //tests that the correct number of batches were dispatched
             expect(testData.length).toBe(BATCH_COUNT);

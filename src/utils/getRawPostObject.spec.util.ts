@@ -9,6 +9,6 @@ export default (id: number, sec?: string): RawPost => {
         thrRelationalScore: 10,
         secRelationalScore: 10,
         autRelation: { follows: false, muted: true, score: 10 },
-        postState: { weight: 10, vote: 0, seen: false },
+        postState: { weight: 10, vote: 0, seen: false, sess: "sess" },
     };
 };

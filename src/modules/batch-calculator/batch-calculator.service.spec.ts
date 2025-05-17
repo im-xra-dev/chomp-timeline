@@ -80,7 +80,7 @@ describe('BatchCalculatorService', () => {
             getRaw(6),
         ];
 
-        const output = await service.batchCalculate(inputData, REJECT_SCORE);
+        const output = await service.batchCalculate(inputData, REJECT_SCORE, 'userId');
 
         expect(output.length).toBe(expectedOrder.length);
         for (let i = 0; i < expectedOrder.length; i++) {
@@ -92,7 +92,7 @@ describe('BatchCalculatorService', () => {
         it('should throw if minScore < 0', async () => {
             //The reject score should never be negative
             const call = async () => {
-                await service.batchCalculate([], -1);
+                await service.batchCalculate([], -1, 'userId');
             };
             await expect(call()).rejects.toThrow(AssertionError);
         });
@@ -100,7 +100,7 @@ describe('BatchCalculatorService', () => {
         it('should not throw if minScore === 0', async () => {
             //0 is on the boundary, but is valid
             const call = async () => {
-                await service.batchCalculate([], 0);
+                await service.batchCalculate([], 0, 'userId');
                 return true;
             };
             await expect(call()).resolves.toBe(true);
@@ -108,7 +108,7 @@ describe('BatchCalculatorService', () => {
 
         it('should return an empty array if an empty array is provided', async () => {
             //tests that the system doesnt get confused if the batch is empty for some reason
-            const output = await service.batchCalculate([], 10);
+            const output = await service.batchCalculate([], 10, 'userId');
             expect(output.length).toBe(0);
         });
 
@@ -127,6 +127,7 @@ describe('BatchCalculatorService', () => {
             const output = await service.batchCalculate(
                 [getRaw(0), getRaw(1), getRaw(2)],
                 REJECT_SCORE,
+                'userId',
             );
 
             expect(output.length).toBe(1);
@@ -152,6 +153,7 @@ describe('BatchCalculatorService', () => {
             const output = await service.batchCalculate(
                 [getRaw(0), getRaw(1), getRaw(2)],
                 REJECT_SCORE,
+                'userId',
             );
 
             expect(output.length).toBe(1);
@@ -185,7 +187,7 @@ describe('BatchCalculatorService', () => {
                 getRaw(3, 'a'),
             ];
 
-            await service.batchCalculate(inputData, 0);
+            await service.batchCalculate(inputData, 0, "userId");
 
             expect(spy).toHaveBeenNthCalledWith(1, RAW_SCORE, 0);
             expect(spy).toHaveBeenNthCalledWith(2, RAW_SCORE, 1);
@@ -198,7 +200,7 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async () => {
             //if the value is locally cached, it should return that value
             const cacheRef = { test: 69 };
-            const out = await service.getCachedSeenCount(cacheRef, 'test');
+            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
             expect(out).toBe(69);
         });
 
@@ -208,7 +210,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test');
+            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
 
             expect(out).toBe(69);
             expect(cacheRef['test']).toBe(69);
@@ -220,7 +222,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test');
+            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
             expect(out).toBe(0);
             expect(cacheRef['test']).toBe(0);
         });
