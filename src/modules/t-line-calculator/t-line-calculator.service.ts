@@ -93,13 +93,18 @@ export class TLineCalculatorService {
         );
 
         //todo sec rel score
-        const secRelationalScore = secRelation.score;
+        const secRelationalScore = this.conditionalWeight(
+            secRelation.follows,
+            secRelation.score,
+            this.C.C_FOLLOW_BOOST,
+        );
 
         //todo add sec personal score
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
             this.weighted(secRelationalScore, this.C.SW_SEC_REL) +
+                this.weighted(secPersonalScore, this.C.SW_SEC_PER) +
                 this.weighted(authorsPersonalScore, this.C.SW_AUTHOR_PER) +
                 this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL) +
                 this.weighted(thrRelationalScore, this.C.SW_THREAD_REL) +

@@ -51,7 +51,11 @@ export class BatchCalculatorService {
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
         for (let i = 0; i < batch.length; i++) {
             const post: RawPost = batch[i];
-            
+
+            //if the author or community are muted, reject this post
+            if(post.autRelation.muted) continue;
+            if(post.secRelation.muted) continue;
+
             //TODO: if P.postState.sess === sessId, reject post
 
             //TODO: if queryCache(metadata, postId) exists, reject post
