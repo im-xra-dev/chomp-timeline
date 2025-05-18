@@ -10,7 +10,7 @@ type LocalCacheLookup = { [sec: string]: number };
 @Injectable()
 export class BatchCalculatorService {
     constructor(
-        private readonly tlineCacheService: TlineCacherService,
+        private readonly cacherService: TlineCacherService,
         private readonly tlineCalculatorService: TLineCalculatorService,
     ) {}
 
@@ -44,8 +44,11 @@ export class BatchCalculatorService {
         const seenDataLocalCacheRef: LocalCacheLookup = {};
         const sortedDataRef: SortedPost[] = [];
 
-        //TODO get session id for user userId
-        const sessId = "";
+        // get session id for user userId
+        const sessId = await this.cacherService.dispatch(
+            TLineCacheQueriesEnum.GET_SESSION_ID,
+            { userId },
+        )
 
         //calculate scores for all posts in batch and sort them from best to worst
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
@@ -56,9 +59,16 @@ export class BatchCalculatorService {
             if(post.autRelation.muted) continue;
             if(post.secRelation.muted) continue;
 
-            //TODO: if P.postState.sess === sessId, reject post
+            // if the user last viewed this post in the current session, reject post
+            if(post.postState.sess === sessId) continue;
 
-            //TODO: if queryCache(metadata, postId) exists, reject post
+            const inMetadata = await this.cacherService.dispatch(
+                TLineCacheQueriesEnum.EXISTS_IN_METADATA,
+                { userId, postId: post.id },
+            )
+
+            // if the post is already in a cached pool, reject post
+            if(inMetadata) continue;
 
             //calculate the raw score for this post
             const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
@@ -105,8 +115,8 @@ export class BatchCalculatorService {
 
         try {
             //set the local cache value by moving the redis cached value to local cache (defaults to 0 if not exists)
-            const seenCount: unknown = await this.tlineCacheService.dispatch(
-                TLineCacheQueriesEnum.GET_SEEN,
+            const seenCount: unknown = await this.cacherService.dispatch(
+                TLineCacheQueriesEnum.GET_SEEN_COUNT_PER_COMMUNITY,
                 { userId, sec },
             );
             if (seenCount === undefined) seenDataRef[sec] = 0;

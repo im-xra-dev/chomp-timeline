@@ -92,14 +92,12 @@ export class TLineCalculatorService {
             this.C.C_FOLLOW_BOOST,
         );
 
-        //todo sec rel score
+        //followed communities get a follow boost
         const secRelationalScore = this.conditionalWeight(
             secRelation.follows,
             secRelation.score,
             this.C.C_FOLLOW_BOOST,
         );
-
-        //todo add sec personal score
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
