@@ -187,7 +187,7 @@ describe('BatchCalculatorService', () => {
                 getRaw(3, 'a'),
             ];
 
-            await service.batchCalculate(inputData, 0, "userId");
+            await service.batchCalculate(inputData, 0, 'userId');
 
             expect(spy).toHaveBeenNthCalledWith(1, RAW_SCORE, 0);
             expect(spy).toHaveBeenNthCalledWith(2, RAW_SCORE, 1);
@@ -200,7 +200,7 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async () => {
             //if the value is locally cached, it should return that value
             const cacheRef = { test: 69 };
-            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
+            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(69);
         });
 
@@ -210,7 +210,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
+            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
 
             expect(out).toBe(69);
             expect(cacheRef['test']).toBe(69);
@@ -222,7 +222,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test', "userId");
+            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(0);
             expect(cacheRef['test']).toBe(0);
         });
@@ -260,25 +260,23 @@ describe('BatchCalculatorService', () => {
     });
 
     describe('reject posts seen in this session', () => {
-        it('should reject posts that have a seen sess id equal to the current session', () => {
+        it('should reject posts that have a seen sess id equal to the current session', () => {});
 
-        });
+        it('should reject posts that are in the metadata cache as they are already in a pool', () => {});
 
-        it('should reject posts that are in the metadata cache as they are already in a pool', ()=> {
-
-        });
-
-        it('should not reject posts that are of a different sess id and not in the metadata cache', () => {
-
-        });
-    })
+        it('should not reject posts that are of a different sess id and not in the metadata cache', () => {});
+    });
 
     describe('reject muted', () => {
-        it('should reject posts by muted authors', ()=> {
-
-        })
-        it('should reject posts in muted communities', ()=> {
-
-        })
-    })
+        it('should reject posts by muted authors', async () => {
+            const mutedUser = getRaw(0, "sec", true, false);
+            const output = await service.batchCalculate([mutedUser], 0, 'userId');
+            expect(output.length).toBe(0);
+        });
+        it('should reject posts in muted communities', async () => {
+            const mutedCommunity = getRaw(0, "sec", false, true);
+            const output = await service.batchCalculate([mutedCommunity], 0, 'userId');
+            expect(output.length).toBe(0);
+        });
+    });
 });

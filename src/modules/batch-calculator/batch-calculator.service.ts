@@ -50,25 +50,25 @@ export class BatchCalculatorService {
         //calculate scores for all posts in batch and sort them from best to worst
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
         for (let i = 0; i < batch.length; i++) {
-            const P: RawPost = batch[i];
-
+            const post: RawPost = batch[i];
+            
             //TODO: if P.postState.sess === sessId, reject post
 
             //TODO: if queryCache(metadata, postId) exists, reject post
 
             //calculate the raw score for this post
             const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
-                P.secPersonalScore,
-                P.postPersonalScore,
-                P.authorsPersonalScore,
-                P.thrRelationalScore,
-                P.autRelation,
-                P.secRelation,
-                P.postState,
+                post.secPersonalScore,
+                post.postPersonalScore,
+                post.authorsPersonalScore,
+                post.thrRelationalScore,
+                post.autRelation,
+                post.secRelation,
+                post.postState,
             );
             if (rawScore <= rejectScore) continue; //reject post
 
-            const sec = P.sec;
+            const sec = post.sec;
             //calculate the weighted score based on how many have been seen from this category
             //this is to create variation in the feed so the same category doesnt come up many times in a row
             const seen: number = await this.getCachedSeenCount(seenDataLocalCacheRef, sec, userId);
@@ -80,11 +80,11 @@ export class BatchCalculatorService {
 
             //sort the un-rejected post
             this.sortHighToLow(sortedDataRef, {
-                id: P.id,
+                id: post.id,
                 sec: sec,
                 score: weightScore,
-                seen: P.postState.seen,
-                vote: P.postState.vote,
+                seen: post.postState.seen,
+                vote: post.postState.vote,
             });
             seenDataLocalCacheRef[sec]++;
         }

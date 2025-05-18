@@ -68,7 +68,7 @@ export class TLineCalculatorService {
      * Relational Score - a score based on the relation between the requesting user and the specified node
      * Personal Score - a score based on an individual node
      *
-     * @param secRelationalScore
+     * @param secPersonalScore
      * @param postPersonalScore
      * @param authorsPersonalScore
      * @param thrRelationalScore
@@ -85,9 +85,6 @@ export class TLineCalculatorService {
         secRelation: CommunityRelation,
         postState: PostState,
     ): number {
-        //negative scores are rejected
-        if (autRelation.muted) return -1;
-
         //followed authors get a score boost
         const authorRelationalScore = this.conditionalWeight(
             autRelation.follows,

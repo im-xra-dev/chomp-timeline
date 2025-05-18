@@ -1,6 +1,6 @@
 //functions to handle object defaults
 
-import { PostState, UserRelation } from '../../utils/types';
+import { CommunityRelation, PostState, UserRelation } from '../../utils/types';
 import { TLineCalculatorService } from './t-line-calculator.service';
 
 /**test utility to provide default values for the attributes not being tested
@@ -18,6 +18,24 @@ export function getAuthorRelation({
     muted?: boolean;
     score?: number;
 }): UserRelation {
+    return { follows, muted, score };
+}
+
+/**test utility to provide default values for the attributes not being tested
+ *
+ * @param follows
+ * @param muted
+ * @param score
+ */
+export function getCommunityRelation({
+    follows = false,
+    muted = false,
+    score = 10,
+}: {
+    follows?: boolean;
+    muted?: boolean;
+    score?: number;
+}): CommunityRelation {
     return { follows, muted, score };
 }
 
@@ -52,6 +70,7 @@ export function getPostState({
  * @param autScore
  * @param thrScore
  * @param autRelation
+ * @param secRelation
  * @param postState
  */
 export function relevanceTest(
@@ -62,6 +81,7 @@ export function relevanceTest(
         autScore = 10,
         thrScore = 10,
         autRelation = getAuthorRelation({}),
+        secRelation = getCommunityRelation({}),
         postState = getPostState({}),
     }: {
         secScore?: number;
@@ -69,6 +89,7 @@ export function relevanceTest(
         autScore?: number;
         thrScore?: number;
         autRelation?: UserRelation;
+        secRelation?: CommunityRelation;
         postState?: PostState;
     },
 ): number {
@@ -78,6 +99,7 @@ export function relevanceTest(
         autScore,
         thrScore,
         autRelation,
+        secRelation,
         postState,
     );
 }
