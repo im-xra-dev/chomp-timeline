@@ -14,7 +14,7 @@ import {
     OPTIONAL_USER_INTERACT_POST,
     OPTIONAL_USER_INTERACT_AUTHOR,
     OPTIONAL_USER_INTERACT_BITE,
-} from './feed-query-config';
+} from '../../configs/neo-feed-querier.config/feed-query-config';
 import { strictEqual } from 'assert';
 import { FeedQueryError } from '../../errors/feed-query-error';
 
