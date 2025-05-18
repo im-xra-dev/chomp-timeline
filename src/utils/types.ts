@@ -6,6 +6,9 @@ export type UserRelation = Readonly<{
     muted: boolean;
     score: number;
 }>;
+
+export type CommunityRelation = UserRelation;
+
 export type PostState = Readonly<{
     weight: number;
     seen: boolean;
@@ -16,10 +19,11 @@ export type PostState = Readonly<{
 export type RawPost = Readonly<{
     id: string;
     sec: string;
-    secRelationalScore: number;
+    secPersonalScore: number;
     postPersonalScore: number;
     authorsPersonalScore: number;
     thrRelationalScore: number;
+    secRelation: CommunityRelation;
     autRelation: UserRelation;
     postState: PostState;
 }>;

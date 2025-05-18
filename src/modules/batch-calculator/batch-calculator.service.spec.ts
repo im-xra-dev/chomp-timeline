@@ -250,7 +250,7 @@ describe('BatchCalculatorService', () => {
             expect(sorter[0].id).toBe('MOCK0');
         });
 
-        it('should insert the identical posts at the bottom', () => {
+        it('should insert posts with identical scores at the bottom of the ones containing that score', () => {
             //place identical posts at the bottom, as there is no point
             //iterating over the posts of the same score for no reason
             const sorter = [getSortedPostObj(1, 9)];
@@ -258,4 +258,27 @@ describe('BatchCalculatorService', () => {
             expect(sorter[1].id).toBe('MOCK0');
         });
     });
+
+    describe('reject posts seen in this session', () => {
+        it('should reject posts that have a seen sess id equal to the current session', () => {
+
+        });
+
+        it('should reject posts that are in the metadata cache as they are already in a pool', ()=> {
+
+        });
+
+        it('should not reject posts that are of a different sess id and not in the metadata cache', () => {
+
+        });
+    })
+
+    describe('reject muted', () => {
+        it('should reject posts by muted authors', ()=> {
+
+        })
+        it('should reject posts in muted communities', ()=> {
+
+        })
+    })
 });

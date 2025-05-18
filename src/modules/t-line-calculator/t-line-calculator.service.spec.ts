@@ -42,7 +42,7 @@ describe('TLineCalculatorService', () => {
             expect(score).toBeLessThan(0);
         });
 
-        it('should calculate relevance higher if follow=true (based on rel score)', () => {
+        it('should calculate relevance higher if the author relation is follow=true (based on relations score)', () => {
             const followedUser: UserRelation = getAuthorRelation({
                 follows: true,
             });
@@ -59,6 +59,15 @@ describe('TLineCalculatorService', () => {
 
             expect(testScore).toBeGreaterThan(baseScore);
         });
+
+        it('should calculate relevance higher if the community relation is follow=true (based on relations score)', () => {
+
+        });
+
+        it('should calculate relevance higher for communities with higher score', () => {
+
+        });
+        
 
         it("should calculate relevance higher if autUsers' score is higher", () => {
             const scoredUser: UserRelation = getAuthorRelation({ score: 20 });

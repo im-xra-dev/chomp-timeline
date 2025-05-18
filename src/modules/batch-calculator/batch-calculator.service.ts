@@ -58,11 +58,12 @@ export class BatchCalculatorService {
 
             //calculate the raw score for this post
             const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
-                P.secRelationalScore,
+                P.secPersonalScore,
                 P.postPersonalScore,
                 P.authorsPersonalScore,
                 P.thrRelationalScore,
                 P.autRelation,
+                P.secRelation,
                 P.postState,
             );
             if (rawScore <= rejectScore) continue; //reject post

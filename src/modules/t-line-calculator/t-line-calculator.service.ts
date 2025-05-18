@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
-import { PostState, UserRelation } from '../../utils/types';
+import { CommunityRelation, PostState, UserRelation } from '../../utils/types';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
@@ -73,14 +73,16 @@ export class TLineCalculatorService {
      * @param authorsPersonalScore
      * @param thrRelationalScore
      * @param autRelation
+     * @param secRelation
      * @param postState
      */
     calculateRelevanceScore(
-        secRelationalScore: number,
+        secPersonalScore: number,
         postPersonalScore: number,
         authorsPersonalScore: number,
         thrRelationalScore: number,
         autRelation: UserRelation,
+        secRelation: CommunityRelation,
         postState: PostState,
     ): number {
         //negative scores are rejected
@@ -92,6 +94,11 @@ export class TLineCalculatorService {
             autRelation.score,
             this.C.C_FOLLOW_BOOST,
         );
+
+        //todo sec rel score
+        const secRelationalScore = secRelation.score;
+
+        //todo add sec personal score
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
