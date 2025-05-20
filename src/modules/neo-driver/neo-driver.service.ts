@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Driver, driver, auth, Session } from 'neo4j-driver';
-import { NeoConnectionError } from '../../utils/NeoConnectionError';
+import { NeoConnectionError } from '../../errors/NeoConnectionError';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

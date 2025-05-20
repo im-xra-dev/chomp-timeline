@@ -33,6 +33,10 @@ describe('BatchCalculatorService', () => {
         service = module.get<BatchCalculatorService>(BatchCalculatorService);
         tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
         tlineCacherService = module.get<TlineCacherService>(TlineCacherService);
+
+        const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');
+        cacheSpy.mockResolvedValueOnce('sess-not-seen');
+        cacheSpy.mockResolvedValueOnce(false);
     });
 
     it('should be defined', () => {
@@ -80,7 +84,7 @@ describe('BatchCalculatorService', () => {
             getRaw(6),
         ];
 
-        const output = await service.batchCalculate(inputData, REJECT_SCORE);
+        const output = await service.batchCalculate(inputData, REJECT_SCORE, 'userId');
 
         expect(output.length).toBe(expectedOrder.length);
         for (let i = 0; i < expectedOrder.length; i++) {
@@ -92,7 +96,7 @@ describe('BatchCalculatorService', () => {
         it('should throw if minScore < 0', async () => {
             //The reject score should never be negative
             const call = async () => {
-                await service.batchCalculate([], -1);
+                await service.batchCalculate([], -1, 'userId');
             };
             await expect(call()).rejects.toThrow(AssertionError);
         });
@@ -100,7 +104,7 @@ describe('BatchCalculatorService', () => {
         it('should not throw if minScore === 0', async () => {
             //0 is on the boundary, but is valid
             const call = async () => {
-                await service.batchCalculate([], 0);
+                await service.batchCalculate([], 0, 'userId');
                 return true;
             };
             await expect(call()).resolves.toBe(true);
@@ -108,7 +112,7 @@ describe('BatchCalculatorService', () => {
 
         it('should return an empty array if an empty array is provided', async () => {
             //tests that the system doesnt get confused if the batch is empty for some reason
-            const output = await service.batchCalculate([], 10);
+            const output = await service.batchCalculate([], 10, 'userId');
             expect(output.length).toBe(0);
         });
 
@@ -127,6 +131,7 @@ describe('BatchCalculatorService', () => {
             const output = await service.batchCalculate(
                 [getRaw(0), getRaw(1), getRaw(2)],
                 REJECT_SCORE,
+                'userId',
             );
 
             expect(output.length).toBe(1);
@@ -152,6 +157,7 @@ describe('BatchCalculatorService', () => {
             const output = await service.batchCalculate(
                 [getRaw(0), getRaw(1), getRaw(2)],
                 REJECT_SCORE,
+                'userId',
             );
 
             expect(output.length).toBe(1);
@@ -185,7 +191,7 @@ describe('BatchCalculatorService', () => {
                 getRaw(3, 'a'),
             ];
 
-            await service.batchCalculate(inputData, 0);
+            await service.batchCalculate(inputData, 0, 'userId');
 
             expect(spy).toHaveBeenNthCalledWith(1, RAW_SCORE, 0);
             expect(spy).toHaveBeenNthCalledWith(2, RAW_SCORE, 1);
@@ -198,17 +204,17 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async () => {
             //if the value is locally cached, it should return that value
             const cacheRef = { test: 69 };
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(69);
         });
 
         it('should return the value from redis if it exists', async () => {
             //if the value is not locally cached, it should query it from redis
             //if a value is returned, that is returned and stored in the cache
-            jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(69);
+            jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
 
             expect(out).toBe(69);
             expect(cacheRef['test']).toBe(69);
@@ -217,10 +223,10 @@ describe('BatchCalculatorService', () => {
         it('should return 0 if value is not in local or redis cache', async () => {
             //if the value is not locally cached, it should query it from redis
             //if a value is not returned, it should default to 0, returning and locally caching 0
-            jest.spyOn(tlineCacherService, 'dispatch').mockResolvedValue(undefined);
+            jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(0);
             expect(cacheRef['test']).toBe(0);
         });
@@ -248,12 +254,60 @@ describe('BatchCalculatorService', () => {
             expect(sorter[0].id).toBe('MOCK0');
         });
 
-        it('should insert the identical posts at the bottom', () => {
+        it('should insert posts with identical scores at the bottom of the ones containing that score', () => {
             //place identical posts at the bottom, as there is no point
             //iterating over the posts of the same score for no reason
             const sorter = [getSortedPostObj(1, 9)];
             service.insertPostInPlaceHighToLow(sorter, getRaw(0), 9);
             expect(sorter[1].id).toBe('MOCK0');
+        });
+    });
+
+    describe('reject posts seen in this session', () => {
+        it('should reject posts that have a seen sess id equal to the current session', async () => {
+            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
+            spy.mockResolvedValueOnce('sess'); //default session name for test posts
+            spy.mockResolvedValueOnce(false); // not in metadata (should not execute)
+            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+
+            const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
+
+            expect(output.length).toBe(0);
+        });
+
+        it('should reject posts that are in the metadata cache as they are already in a pool', async () => {
+            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
+            spy.mockResolvedValueOnce('sess-not-seen'); //default session name for test posts
+            spy.mockResolvedValueOnce(true); // not in metadata (should not execute)
+            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+
+            const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
+
+            expect(output.length).toBe(0);
+        });
+
+        it('should not reject posts that are of a different sess id and not in the metadata cache', async () => {
+            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
+            spy.mockResolvedValueOnce('sess-not-seen'); //default session name for test posts
+            spy.mockResolvedValueOnce(false); // not in metadata (should not execute)
+            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+
+            const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
+
+            expect(output.length).toBe(1);
+        });
+    });
+
+    describe('reject muted', () => {
+        it('should reject posts by muted authors', async () => {
+            const mutedUser = getRaw(0, 'sec', true, false);
+            const output = await service.batchCalculate([mutedUser], 0, 'userId');
+            expect(output.length).toBe(0);
+        });
+        it('should reject posts in muted communities', async () => {
+            const mutedCommunity = getRaw(0, 'sec', false, true);
+            const output = await service.batchCalculate([mutedCommunity], 0, 'userId');
+            expect(output.length).toBe(0);
         });
     });
 });

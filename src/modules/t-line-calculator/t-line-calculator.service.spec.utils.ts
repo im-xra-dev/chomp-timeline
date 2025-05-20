@@ -1,6 +1,6 @@
 //functions to handle object defaults
 
-import { PostState, RawPost, UserRelation } from '../../utils/types';
+import { CommunityRelation, PostState, UserRelation } from '../../utils/types';
 import { TLineCalculatorService } from './t-line-calculator.service';
 
 /**test utility to provide default values for the attributes not being tested
@@ -23,20 +23,41 @@ export function getAuthorRelation({
 
 /**test utility to provide default values for the attributes not being tested
  *
+ * @param follows
+ * @param muted
+ * @param score
+ */
+export function getCommunityRelation({
+    follows = false,
+    muted = false,
+    score = 10,
+}: {
+    follows?: boolean;
+    muted?: boolean;
+    score?: number;
+}): CommunityRelation {
+    return { follows, muted, score };
+}
+
+/**test utility to provide default values for the attributes not being tested
+ *
  * @param seen
  * @param weight
  * @param vote
+ * @param sess
  */
 export function getPostState({
     seen = false,
     weight = 1,
     vote = 0,
+    sess = "sess",
 }: {
     seen?: boolean;
     weight?: number;
     vote?: number;
+    sess?: string;
 }): PostState {
-    return { seen, weight, vote };
+    return { seen, weight, vote, sess };
 }
 
 /**test utility to provide default values for the attributes not being tested
@@ -49,6 +70,7 @@ export function getPostState({
  * @param autScore
  * @param thrScore
  * @param autRelation
+ * @param secRelation
  * @param postState
  */
 export function relevanceTest(
@@ -59,6 +81,7 @@ export function relevanceTest(
         autScore = 10,
         thrScore = 10,
         autRelation = getAuthorRelation({}),
+        secRelation = getCommunityRelation({}),
         postState = getPostState({}),
     }: {
         secScore?: number;
@@ -66,18 +89,17 @@ export function relevanceTest(
         autScore?: number;
         thrScore?: number;
         autRelation?: UserRelation;
+        secRelation?: CommunityRelation;
         postState?: PostState;
     },
 ): number {
-    const rawPost: RawPost = {
-        id: '0',
-        sec: 'test',
-        secRelationalScore: secScore,
-        postPersonalScore: postScore,
-        authorsPersonalScore: autScore,
-        thrRelationalScore: thrScore,
-        autRelation: autRelation,
-        postState: postState,
-    };
-    return service.calculateRelevanceScore(rawPost);
+    return service.calculateRelevanceScore(
+        secScore,
+        postScore,
+        autScore,
+        thrScore,
+        autRelation,
+        secRelation,
+        postState,
+    );
 }

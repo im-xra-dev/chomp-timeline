@@ -77,7 +77,7 @@ _Attributes_
 - muted: boolean
 - score: number
 
-### PostedIn
+### PostedIn and RepostedIn
 
 This relationship refers to a post and a thread and determines which threads the post
 has been added to and at what time
@@ -120,6 +120,8 @@ The existence of this connection represents the post having been viewed.
 _Attributes_
 
 - vote: number -1 <= x <= 1
+- sess: string - session last seen in
+- seen: number - strength of the view, (no viewport, scroll past or long view)
 
 ### RecipeInteraction
 

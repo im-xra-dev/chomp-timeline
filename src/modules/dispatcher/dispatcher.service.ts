@@ -27,11 +27,13 @@ export class DispatcherService {
      * @param rawPool
      * @param outSize
      * @param minScore
+     * @param userId
      */
     dispatchConcurrentPosts(
         rawPool: readonly RawPost[],
         outSize: number,
         minScore: number,
+        userId: string,
     ): Promise<readonly SortedPost[]>[] {
         strictEqual(outSize > 0, true, 'dispatchConcurrentPosts -> outSize must be > 0');
 
@@ -60,6 +62,7 @@ export class DispatcherService {
         for (let batchesProcessed = 0; batchesProcessed < batchCount; batchesProcessed++) {
             jobBuilder.push(
                 this.buildJobBatch(
+                  userId,
                     rawPool,
                     batchesProcessed,
                     actualBatchSize,
@@ -78,6 +81,7 @@ export class DispatcherService {
      *
      * builds the individual batch
      *
+     * @param userId
      * @param rawPool
      * @param batchesProcessed
      * @param actualBatchSize
@@ -86,6 +90,7 @@ export class DispatcherService {
      * @param minScore
      */
     private buildJobBatch(
+      userId: string,
         rawPool: readonly RawPost[],
         batchesProcessed: number,
         actualBatchSize: number,
@@ -109,6 +114,6 @@ export class DispatcherService {
 
         //we can then dispatch the job to the batch calculator, and return the promised calculation
         //for the job builder so that the JobRunner can pick them up and process them later
-        return this.batchCalculatorService.batchCalculate(jobBatch, minScore);
+        return this.batchCalculatorService.batchCalculate(jobBatch, minScore, userId);
     }
 }
