@@ -204,7 +204,7 @@ describe('BatchCalculatorService', () => {
         it('should return the value stored in "seenData" if it exists', async () => {
             //if the value is locally cached, it should return that value
             const cacheRef = { test: 69 };
-            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(69);
         });
 
@@ -214,7 +214,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(69);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
 
             expect(out).toBe(69);
             expect(cacheRef['test']).toBe(69);
@@ -226,7 +226,7 @@ describe('BatchCalculatorService', () => {
             jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(undefined);
 
             const cacheRef = {};
-            const out = await service.getCachedSeenCount(cacheRef, 'test', 'userId');
+            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
             expect(out).toBe(0);
             expect(cacheRef['test']).toBe(0);
         });
@@ -236,21 +236,21 @@ describe('BatchCalculatorService', () => {
         it('should insert the first post at index 0', () => {
             //ensures element 0 contains the first element
             const sorter = [];
-            service.sortHighToLow(sorter, getSortedPostObj(0, 10));
+            service.insertPostInPlaceHighToLow(sorter, getRaw(0), 10);
             expect(sorter[0].id).toBe('MOCK0');
         });
 
         it('should insert the worst post at the end', () => {
             //ensures lowest ranked posts are sorted at the bottom
             const sorter = [getSortedPostObj(1, 9), getSortedPostObj(2, 5), getSortedPostObj(3, 1)];
-            service.sortHighToLow(sorter, getSortedPostObj(0, 0));
+            service.insertPostInPlaceHighToLow(sorter, getRaw(0), 0);
             expect(sorter[3].id).toBe('MOCK0');
         });
 
         it('should insert the best post at index 0', () => {
             //ensures highest ranked posts are sorted to the top
             const sorter = [getSortedPostObj(1, 9), getSortedPostObj(2, 5), getSortedPostObj(3, 1)];
-            service.sortHighToLow(sorter, getSortedPostObj(0, 10));
+            service.insertPostInPlaceHighToLow(sorter, getRaw(0), 10);
             expect(sorter[0].id).toBe('MOCK0');
         });
 
@@ -258,7 +258,7 @@ describe('BatchCalculatorService', () => {
             //place identical posts at the bottom, as there is no point
             //iterating over the posts of the same score for no reason
             const sorter = [getSortedPostObj(1, 9)];
-            service.sortHighToLow(sorter, getSortedPostObj(0, 9));
+            service.insertPostInPlaceHighToLow(sorter, getRaw(0), 9);
             expect(sorter[1].id).toBe('MOCK0');
         });
     });
