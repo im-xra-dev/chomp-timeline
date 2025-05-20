@@ -1,13 +1,13 @@
 import { AssertionError } from 'assert';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PostState, UserRelation } from '../../utils/types';
+import { CommunityRelation, PostState, UserRelation } from '../../utils/types';
 import { TLineCalculatorService } from './t-line-calculator.service';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import {
     getPostState,
     relevanceTest,
-    getAuthorRelation,
+    getAuthorRelation, getCommunityRelation,
 } from './t-line-calculator.service.spec.utils';
 
 describe('TLineCalculatorService', () => {
@@ -35,18 +35,11 @@ describe('TLineCalculatorService', () => {
     //for different inputs to ensure that different inputs alter data in the correct direction
 
     describe('calculate relevance score', () => {
-        it('should calculate relevance as negative because the author is muted', () => {
-            const mutedUser: UserRelation = getAuthorRelation({ muted: true });
-            const score = relevanceTest(service, { autRelation: mutedUser });
-
-            expect(score).toBeLessThan(0);
-        });
-
-        it('should calculate relevance higher if follow=true (based on rel score)', () => {
+        it('should calculate relevance higher if the author relation is follow=true (based on relations score)', () => {
             const followedUser: UserRelation = getAuthorRelation({
                 follows: true,
             });
-            const defaultFollowedUser: UserRelation = getAuthorRelation({
+            const defaultUser: UserRelation = getAuthorRelation({
                 follows: false,
             });
 
@@ -54,13 +47,50 @@ describe('TLineCalculatorService', () => {
                 autRelation: followedUser,
             });
             const baseScore = relevanceTest(service, {
-                autRelation: defaultFollowedUser,
+                autRelation: defaultUser,
             });
 
             expect(testScore).toBeGreaterThan(baseScore);
         });
 
-        it("should calculate relevance higher if autUsers' score is higher", () => {
+        it('should calculate relevance higher if the community relation is follow=true (based on relations score)', () => {
+            const communityFollowedRelation: CommunityRelation = getCommunityRelation({
+                follows: true,
+            });
+            const defaultCommunity: CommunityRelation = getCommunityRelation({
+                follows: false,
+            });
+
+            const testScore = relevanceTest(service, {
+                secRelation: communityFollowedRelation,
+            });
+            const baseScore = relevanceTest(service, {
+                secRelation: defaultCommunity,
+            });
+
+            expect(testScore).toBeGreaterThan(baseScore);
+
+        });
+
+        it('should calculate relevance higher for communities with higher relevance score', () => {
+            const scoredCommunity: CommunityRelation = getCommunityRelation({ score: 20 });
+            const defaultScoredCommunity: CommunityRelation = getCommunityRelation({
+                score: 19,
+            });
+
+            const testScore = relevanceTest(service, {
+                secRelation: scoredCommunity,
+            });
+            const baseScore = relevanceTest(service, {
+                secRelation: defaultScoredCommunity,
+            });
+
+            expect(testScore).toBeGreaterThan(baseScore);
+
+        });
+        
+
+        it("should calculate relevance higher if autUsers' relation score is higher", () => {
             const scoredUser: UserRelation = getAuthorRelation({ score: 20 });
             const defaultScoredUser: UserRelation = getAuthorRelation({
                 score: 19,
@@ -100,7 +130,7 @@ describe('TLineCalculatorService', () => {
             expect(testScore).toBeGreaterThan(baseScore);
         });
 
-        it('should calculate relevance higher for secs with higher score', () => {
+        it('should calculate relevance higher for communities with higher score', () => {
             const testScore = relevanceTest(service, { secScore: 50 });
             const baseScore = relevanceTest(service, { secScore: 49 });
 

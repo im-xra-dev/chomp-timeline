@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
-import { PostState, UserRelation } from '../../utils/types';
+import { CommunityRelation, PostState, UserRelation } from '../../utils/types';
 import { TLineCalculatorConfigService } from '../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
@@ -68,24 +68,23 @@ export class TLineCalculatorService {
      * Relational Score - a score based on the relation between the requesting user and the specified node
      * Personal Score - a score based on an individual node
      *
-     * @param secRelationalScore
+     * @param secPersonalScore
      * @param postPersonalScore
      * @param authorsPersonalScore
      * @param thrRelationalScore
      * @param autRelation
+     * @param secRelation
      * @param postState
      */
     calculateRelevanceScore(
-        secRelationalScore: number,
+        secPersonalScore: number,
         postPersonalScore: number,
         authorsPersonalScore: number,
         thrRelationalScore: number,
         autRelation: UserRelation,
+        secRelation: CommunityRelation,
         postState: PostState,
     ): number {
-        //negative scores are rejected
-        if (autRelation.muted) return -1;
-
         //followed authors get a score boost
         const authorRelationalScore = this.conditionalWeight(
             autRelation.follows,
@@ -93,9 +92,17 @@ export class TLineCalculatorService {
             this.C.C_FOLLOW_BOOST,
         );
 
+        //followed communities get a follow boost
+        const secRelationalScore = this.conditionalWeight(
+            secRelation.follows,
+            secRelation.score,
+            this.C.C_FOLLOW_BOOST,
+        );
+
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
         const score = this.weighted(
             this.weighted(secRelationalScore, this.C.SW_SEC_REL) +
+                this.weighted(secPersonalScore, this.C.SW_SEC_PER) +
                 this.weighted(authorsPersonalScore, this.C.SW_AUTHOR_PER) +
                 this.weighted(authorRelationalScore, this.C.SW_AUTHOR_REL) +
                 this.weighted(thrRelationalScore, this.C.SW_THREAD_REL) +

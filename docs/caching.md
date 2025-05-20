@@ -3,6 +3,7 @@ The cache stores information relevant to the users current session. This include
 - info on whats already been shown to them (to avoid duplication and promote diversity in the feed)
 - a pre-cached pool of posts, ranked from best to worst
 - the current timeline in the order it will be sent to the user
+- attributes related to the cache, such as cache size and limit/skip configuration
 
 The cache should automatically kill data that is too old, though the system will also process jobs that clear
 it when required. Ideally, data should never become too old. This method of killing is a failsafe.
@@ -38,6 +39,10 @@ while the data is re-ordered. While this is going on, the user can still pop pos
 cache without worrying about the background ranking processes holding a lock on the data.
 
 ## Data Layout
+> tline:[userid]:finalpool
+
+The final ordered pool of posts. LPOPed to send posts to user, RSHIFTed to append more.
+
 > tline:[userid]:precache:[cacheid]
 
 The pre-caches store a string[] of post IDs. The left-most id can be LPOPed in constant time, or a number of
@@ -48,26 +53,36 @@ IDs can be popped at once.
 I am still researching the best way to implement the lock, though SETNX could likely be used to set a boolean.
 https://redis.io/glossary/redis-lock/
 
-> tline:[userid]:seen:[postid]
+> tline:[userid]:metadata:[postid]
 
-A hash with keys to store info about the posts. This is used to prevent the same post appearing multiple times
-in one session.
+A hash with keys to store info about the posts. Can be deleted after the post has been served to the user.
+
+seen & vote - returned to the user to set up the UI 
+score - used internally to calculate the ordering of the posts in the pre-cache.
 
 keys:
 
-- seensess: boolean, used for querying if a post has been seen in the current session
-- score: number, used to store the calculated score of this post
-- sec: string, used to store the subsection this post belongs to
-- thread: string, used to store the thread this post belongs to
+- score: number, used to order the posts when updating the precache
 - seen: boolean, used to store if the user has seen this post in a previous session
 - vote: number, used to store if the user has liked/disliked this post
 
-> tline:[userid]:data:[mode]:[id] 
+> tline:[userid]:percategory:[category]
 
-A hash containing data relevant to the categories shown in this session, for example, section relations or
-user relations.
+A number containing how many posts from this category that have been shown in this session
 
-keys:
+> tline:[userid]:cachesize:[cacheid | "$finalpool"]
 
-- score: number, this is the value that shows how strong the users connection is to this category
-- totalPosts: number, this is the total posts marked as seen from this category in this session 
+A number representing the total cache size configuration
+
+> tline:[userid]:skip
+
+A number representing the query skip configuration
+
+> tline:[userid]:limit
+
+A number representing the query limit configuration
+
+> tline:[userid]:sessid
+
+A string representing the session ID
+
