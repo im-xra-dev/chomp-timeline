@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NeoQueryService } from './neo-query.service';
+import { FeedQuerier } from './feed-querier.service';
 import { NeoDriverService } from '../neo-driver/neo-driver.service';
 
 describe('NeoQueryService', () => {
-    let service: NeoQueryService;
+    let service: FeedQuerier;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                NeoQueryService,
+                FeedQuerier,
                 {
                     provide: NeoDriverService,
                     useValue: {
@@ -18,10 +18,11 @@ describe('NeoQueryService', () => {
             ],
         }).compile();
 
-        service = module.get<NeoQueryService>(NeoQueryService);
+        service = module.get<FeedQuerier>(FeedQuerier);
     });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
+
 });

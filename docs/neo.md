@@ -77,7 +77,7 @@ _Attributes_
 - muted: boolean
 - score: number
 
-### PostedIn
+### PostedIn and RepostedIn
 
 This relationship refers to a post and a thread and determines which threads the post
 has been added to and at what time
