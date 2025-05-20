@@ -96,7 +96,7 @@ export class TLineCalculatorService {
         const secRelationalScore = this.conditionalWeight(
             secRelation.follows,
             secRelation.score,
-            this.C.C_FOLLOW_BOOST,
+            this.config.C_FOLLOW_BOOST,
         );
 
         //calculate score by weighting all the values. The weights should be tweaked according to A/B testing
@@ -107,7 +107,7 @@ export class TLineCalculatorService {
                 this.weighted(authorRelationalScore, this.config.SW_AUTHOR_REL) +
                 this.weighted(thrRelationalScore, this.config.SW_THREAD_REL) +
                 this.weighted(postPersonalScore, this.config.SW_POST_PER),
-            this.C.W_CALCULATED,
+            this.config.W_CALCULATED,
         );
         //viewed posts are weighted (by how much depends on view context)
         if (postState.seen) return score * postState.weight;
