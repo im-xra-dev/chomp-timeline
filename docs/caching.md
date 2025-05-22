@@ -74,11 +74,11 @@ A number containing how many posts from this category that have been shown in th
 
 A number representing the total cache size configuration
 
-> tline:[userid]:skip
+> tline:[userid]:skip:[cacheid]
 
 A number representing the query skip configuration
 
-> tline:[userid]:limit
+> tline:[userid]:limit:[cacheid]
 
 A number representing the query limit configuration
 
