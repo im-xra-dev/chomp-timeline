@@ -27,7 +27,7 @@ export class RedisCacheDriverService {
         if (RedisCacheDriverService.client.isReady) return RedisCacheDriverService.client;
 
         //if the client is not ready (still connecting/reconnecting in an outage)
-        //then promise to return it, this is handled by the connection event listener
+        //then promise to return it, this is handled by the ready event listener
         return new Promise<RedisClientType>((resolve, reject) => {
             RedisCacheDriverService.waitingToOpenQueue.push({ resolve, reject });
         });
