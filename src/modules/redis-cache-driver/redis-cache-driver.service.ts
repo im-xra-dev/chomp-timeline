@@ -69,7 +69,7 @@ export class RedisCacheDriverService {
         });
 
         //register all the event listeners
-        RedisCacheDriverService.client.on('connect', this.handleConnect);
+        RedisCacheDriverService.client.on('connect', this.handleConnecting);
         RedisCacheDriverService.client.on('ready', this.handleReady);
         RedisCacheDriverService.client.on('end', this.handleEnd);
         RedisCacheDriverService.client.on('reconnecting', this.handleReconnecting);
@@ -81,10 +81,12 @@ export class RedisCacheDriverService {
 
     //----------- handlers -----------\\
 
+    //logging errors
     private handleError(error: Error) {
         console.error(error);
     }
 
+    //connection complete and ready for requests
     private handleReady(): void {
         console.log('redis instance ready');
 
@@ -95,6 +97,7 @@ export class RedisCacheDriverService {
         }
     }
 
+    //clean up after the redis client has disconnected
     private handleEnd() {
         console.log('redis connection terminated');
         //cleanup
@@ -102,10 +105,12 @@ export class RedisCacheDriverService {
         RedisCacheDriverService.client = undefined;
     }
 
-    private handleConnect() {
+    //redis is currently connecting
+    private handleConnecting() {
         console.log('redis connecting in progress');
     }
 
+    //redis is currently re-connecting
     private handleReconnecting() {
         console.log('redis reconnecting');
     }
