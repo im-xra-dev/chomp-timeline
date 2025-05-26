@@ -2,26 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import { RawPost } from '../../../utils/types';
 import { strictEqual } from 'assert';
-
-export type Stage2CacheData = {
-    sessId: string;
-    cachedPosts: {
-        string?: boolean;
-    };
-    perCommunitySeenPost: {
-        string?: number;
-    };
-};
-
-export enum LookupEnum {
-    POST,
-    COMMUNITY_SEEN_COUNT,
-}
-
-export type LookupData = {
-    type: LookupEnum;
-    value: string;
-};
+import { LookupData, LookupEnum, Stage2CacheData } from '../CacheEnumsAndTypes';
 
 @Injectable()
 export class Stage2CacheManagementService {
