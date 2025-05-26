@@ -5,6 +5,7 @@ import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-dr
 import { JobTypes } from '../../../utils/JobTypes';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { SESS_ID_EXPIRE } from '../../../configs/cache-expirations/expire';
+import { GET_SESSION_KEY } from '../../../configs/cache-keys/expire';
 
 describe('InitCacheService', () => {
     let service: InitCacheService;
@@ -76,7 +77,7 @@ describe('InitCacheService', () => {
             });
 
             //check it was valid
-            expect(RedisMock.set).toBeCalledWith(`tline:${userId}:sessid`, sessId, {EX: SESS_ID_EXPIRE});
+            expect(RedisMock.set).toBeCalledWith(GET_SESSION_KEY(userId), sessId, {EX: SESS_ID_EXPIRE});
             expect(output).toBe(JobTypes.CONTINUE);
         });
     });

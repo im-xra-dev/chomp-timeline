@@ -3,6 +3,7 @@ import { InitJobListing, JobResult } from '../../../utils/types';
 import { JobTypes } from '../../../utils/JobTypes';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import { SESS_ID_EXPIRE } from '../../../configs/cache-expirations/expire';
+import { GET_SESSION_KEY } from '../../../configs/cache-keys/expire';
 
 @Injectable()
 export class InitCacheService {
@@ -16,7 +17,7 @@ export class InitCacheService {
      */
     async initJob(job: InitJobListing): Promise<JobResult> {
         //init constants
-        const LOOKUP_KEY = `tline:${job.userid}:sessid`;
+        const LOOKUP_KEY = GET_SESSION_KEY(job.userid);
 
         //initialize the client
         const client = await this.cacheService.getClient();
