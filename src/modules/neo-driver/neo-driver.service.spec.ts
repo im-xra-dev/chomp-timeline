@@ -22,13 +22,15 @@ describe('NeoDriverService', () => {
 
     //skipped by default as it requires a successful connection to be made
     describe.skip('test cases against a successful connection', () => {
+        afterEach(async () => {
+            //cleanup
+            await service.close();
+        });
+
         it('should connect to the neo4j host with .env variables', async () => {
             //run the test
             const success = await service.bootup();
             expect(success).toBe(true);
-
-            //cleanup
-            await service.close();
         });
 
         it('should return a session if a driver is already connected', async () => {
@@ -42,7 +44,6 @@ describe('NeoDriverService', () => {
 
             //cleanup
             await session.close();
-            await service.close();
         });
 
         it('should return a session after creating a driver if one is not connected', async () => {
@@ -52,7 +53,6 @@ describe('NeoDriverService', () => {
 
             //cleanup
             await session.close();
-            await service.close();
         });
     });
 

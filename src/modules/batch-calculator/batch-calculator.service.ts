@@ -87,6 +87,9 @@ export class BatchCalculatorService {
         // if the user last viewed this post in the current session, reject post
         if (rawPost.postState.sess === sessId) return;
 
+        //TODO:::: IMPORTANT this should be batched outside of loop !!!!!
+        //TODO:::: per community seen count too
+        //TODO:::: sessid in same batch
         const inMetadata = await this.cacherService.dispatch(
             TLineCacheQueriesEnum.EXISTS_IN_METADATA,
             { userId, postId: rawPost.id },

@@ -8,6 +8,16 @@ The cache stores information relevant to the users current session. This include
 The cache should automatically kill data that is too old, though the system will also process jobs that clear
 it when required. Ideally, data should never become too old. This method of killing is a failsafe.
 
+## Accessing redis
+
+Redis can be accessed through the RedisCacheDriverModule and Service.
+
+An instance can be retrieved by calling the asynchronous `getClient()` method.
+
+There is also a `shutdown` method provided in this module, this is to be called
+when the system shuts down. Calling this method before this will require a new client
+instance to be setup next time `getClient` is called.
+
 ## The Problem
 
 Querying a large number of posts and crunching it down can be a slow but is required for creating
@@ -74,11 +84,11 @@ A number containing how many posts from this category that have been shown in th
 
 A number representing the total cache size configuration
 
-> tline:[userid]:skip
+> tline:[userid]:skip:[cacheid]
 
 A number representing the query skip configuration
 
-> tline:[userid]:limit
+> tline:[userid]:limit:[cacheid]
 
 A number representing the query limit configuration
 
