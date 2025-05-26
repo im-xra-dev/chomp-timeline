@@ -15,7 +15,7 @@ type LocalCacheLookup = { [sec: string]: number };
 export class BatchCalculatorService {
     constructor(
         private readonly cacherService: TlineCacherService,
-        private readonly tlineCalculatorService: Stage2CalculationsService,
+        private readonly calculationsService: Stage2CalculationsService,
     ) {}
 
     /**Calculates and ranks a batch of posts
@@ -99,7 +99,7 @@ export class BatchCalculatorService {
         if (inMetadata) return;
 
         //calculate the raw score for this post
-        const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
+        const rawScore: number = this.calculationsService.calculateRelevanceScore(
             rawPost.secPersonalScore,
             rawPost.postPersonalScore,
             rawPost.authorsPersonalScore,
@@ -119,7 +119,7 @@ export class BatchCalculatorService {
 
         //calculate the weighted score based on how many have been seen from this category
         //this is to create variation in the feed so the same category doesnt come up many times in a row
-        const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
+        const weightScore: number = this.calculationsService.calculateTotalSeenWeight(
             rawScore,
             seen,
         );
