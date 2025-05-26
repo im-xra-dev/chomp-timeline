@@ -3,6 +3,7 @@ import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-dr
 import { RawPost } from '../../../utils/types';
 import { strictEqual } from 'assert';
 import { LookupData, LookupEnum, Stage2CacheData } from '../CacheEnumsAndTypes';
+import { GET_METADATA_KEY, GET_PER_CATEGORY_KEY, GET_SESSION_KEY } from '../../../configs/cache-keys/keys';
 
 @Injectable()
 export class Stage2CacheManagementService {
@@ -20,7 +21,6 @@ export class Stage2CacheManagementService {
         strictEqual(userId === null, false, 'stage2cacheManagementService -> userId must be provided');
 
         //init vars
-        const prefix = `tline:${userId}:`;
         const communityNames: { [key: string]: boolean } = {};
         const lookup: LookupData[] = [];
 
@@ -29,7 +29,7 @@ export class Stage2CacheManagementService {
         const builder = client.multi();
 
         //add the session id to the query
-        builder.get(`${prefix}sessid`);
+        builder.get(GET_SESSION_KEY(userId));
 
         //add the communities and posts to the query
         for (let i = 0; i < batch.length; i++) {
@@ -37,13 +37,13 @@ export class Stage2CacheManagementService {
             const postId = batch[i].id;
 
             //add this post to the query
-            builder.hGet(`${prefix}metadata:${postId}`, 'score');
+            builder.hGet(GET_METADATA_KEY(userId, postId), 'score');
             lookup.push({ type: LookupEnum.POST, value: postId });
 
             //if a community has not been added yet, add it to the query
             if (!communityNames[postCommunity]) {
                 communityNames[postCommunity] = true;
-                builder.get(`${prefix}percategory:${postCommunity}`);
+                builder.get(GET_PER_CATEGORY_KEY(userId, postCommunity));
                 lookup.push({ type: LookupEnum.COMMUNITY_SEEN_COUNT, value: postCommunity });
             }
         }

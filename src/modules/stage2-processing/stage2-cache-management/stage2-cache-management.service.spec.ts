@@ -4,6 +4,7 @@ import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-dr
 import getRawPostObjectSpecUtil from '../../../utils/getRawPostObject.spec.util';
 import { RawPost } from '../../../utils/types';
 import { LookupData, LookupEnum, Stage2CacheData } from '../CacheEnumsAndTypes';
+import { GET_METADATA_KEY, GET_PER_CATEGORY_KEY, GET_SESSION_KEY } from '../../../configs/cache-keys/keys';
 
 describe('Stage2CacheManagementService', () => {
     let service: Stage2CacheManagementService;
@@ -14,8 +15,6 @@ describe('Stage2CacheManagementService', () => {
         hGet: jest.fn(),
         exec: jest.fn(),
     };
-
-    const getPrefix = (userId: string) => `tline:${userId}:`;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -63,7 +62,7 @@ describe('Stage2CacheManagementService', () => {
             await service.getCachedData(userId, [getRawPostObjectSpecUtil(0, 'community')]);
 
             //first get call should be for the session id
-            expect(getMock).toHaveBeenNthCalledWith(1, `${getPrefix(userId)}sessid`);
+            expect(getMock).toHaveBeenNthCalledWith(1, GET_SESSION_KEY(userId));
         });
 
         it('should get the total seen posts for each community in this batch and add them to the lookup', async () => {
@@ -91,7 +90,7 @@ describe('Stage2CacheManagementService', () => {
             //second get call should be for the percategory total
             expect(getMock).toHaveBeenNthCalledWith(
                 2,
-                `${getPrefix(userId)}percategory:${community}`,
+                GET_PER_CATEGORY_KEY(userId, community),
             );
         });
 
@@ -143,7 +142,7 @@ describe('Stage2CacheManagementService', () => {
             //second get call should be for the percategory total
             expect(hGetMock).toHaveBeenNthCalledWith(
                 1,
-                `${getPrefix(userId)}metadata:${generatedPostId}`,
+                GET_METADATA_KEY(userId, generatedPostId),
                 'score',
             );
         });
