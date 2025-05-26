@@ -27,6 +27,13 @@ export type LookupData = {
 export class Stage2CacheManagementService {
     constructor(private readonly cacherService: RedisCacheDriverService) {}
 
+    /**getCachedData
+     *
+     * gets the data required from the cache for stage 2
+     *
+     * @param userId
+     * @param batch
+     */
     async getCachedData(userId: string, batch: readonly RawPost[]): Promise<Stage2CacheData> {
         strictEqual(batch.length > 0, true, 'stage2cacheManagementService -> batch size must be > 0');
         strictEqual(userId === null, false, 'stage2cacheManagementService -> userId must be provided');
@@ -40,12 +47,17 @@ export class Stage2CacheManagementService {
         const client = await this.cacherService.getClient();
         const builder = client.multi();
 
-        //add the data to the query
+        //add the session id to the query
         builder.get(`${prefix}sessid`);
 
+        //add the communities and posts to the query
         for (let i = 0; i < batch.length; i++) {
             const postCommunity = batch[i].sec;
             const postId = batch[i].id;
+
+            //add this post to the query
+            builder.hGet(`${prefix}metadata:${postId}`, 'score');
+            lookup.push({ type: LookupEnum.POST, value: postId });
 
             //if a community has not been added yet, add it to the query
             if (!communityNames[postCommunity]) {
@@ -53,17 +65,20 @@ export class Stage2CacheManagementService {
                 builder.get(`${prefix}percategory:${postCommunity}`);
                 lookup.push({ type: LookupEnum.COMMUNITY_SEEN_COUNT, value: postCommunity });
             }
-
-            //add this post to the query
-            builder.hGet(`${prefix}metadata:${postId}`, 'score');
-            lookup.push({ type: LookupEnum.POST, value: postId });
         }
 
         //run query and return the sorted data
-        return this.sortData(lookup, await builder.exec());
+        return this.parseData(lookup, await builder.exec());
     }
 
-    private sortData(lookup: LookupData[], data: unknown[]): Stage2CacheData {
+    /**parseData
+     * parses the data from redis into a nice format
+     *
+     * @param lookup
+     * @param data
+     * @private
+     */
+    private parseData(lookup: LookupData[], data: unknown[]): Stage2CacheData {
         //initialize the output data
         const output: Stage2CacheData = {
             sessId: data.shift() as string,

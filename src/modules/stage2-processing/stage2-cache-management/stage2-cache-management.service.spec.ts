@@ -78,6 +78,9 @@ describe('Stage2CacheManagementService', () => {
 
             //create mocks
             const getMock = jest.spyOn(multiMock, 'get');
+            //first push should be the post
+            jest.spyOn(Array.prototype, 'push').mockImplementationOnce(() => 0);
+            //second push should be community
             jest.spyOn(Array.prototype, 'push').mockImplementationOnce((data: LookupData) => {
                 //ensures that the correct data was pushed to the lookup array
                 expect(data.type).toBe(LookupEnum.COMMUNITY_SEEN_COUNT);
@@ -127,15 +130,15 @@ describe('Stage2CacheManagementService', () => {
             //create mocks
             const hGetMock = jest.spyOn(multiMock, 'hGet');
 
-            //first push should be community
-            jest.spyOn(Array.prototype, 'push').mockImplementationOnce(() => 0);
-            //second push is what we are interested in
+            //first push is what we are interested in (post push)
             jest.spyOn(Array.prototype, 'push').mockImplementationOnce((data: LookupData) => {
                 //ensures that the correct data was pushed to the lookup array
                 expect(data.type).toBe(LookupEnum.POST);
                 expect(data.value).toBe(generatedPostId);
                 return 0;
             });
+            //second push should be community
+            jest.spyOn(Array.prototype, 'push').mockImplementationOnce(() => 0);
 
             //run test
             await service.getCachedData(userId, rawPosts);
@@ -163,7 +166,7 @@ describe('Stage2CacheManagementService', () => {
 
         beforeEach(() => {
             //session ID, community seen count, cached post score, community seen count, cached post score
-            multiMock.exec.mockResolvedValue(['sessid', '3', '10', null, null]);
+            multiMock.exec.mockResolvedValue(['sessid', '10', '3', null, null]);
         });
 
         it('should set the session ID in the output data', async () => {
