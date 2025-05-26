@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, expect, it, beforeEach } from '@jest/globals';
 import { TLineService } from './t-line.service';
-import { DispatcherService } from '../../stage2-processing/dispatcher/dispatcher.service';
 
 describe('TLineService', () => {
     let service: TLineService;
@@ -10,13 +9,6 @@ describe('TLineService', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 TLineService,
-                {
-                    provide: DispatcherService,
-                    useValue: {
-                        rankPosts: jest.fn(),
-                        queryFollowedSectionPosts: jest.fn(),
-                    },
-                },
             ],
         }).compile();
 

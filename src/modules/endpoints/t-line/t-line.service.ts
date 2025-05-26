@@ -4,7 +4,7 @@ import { DispatcherService } from '../../stage2-processing/dispatcher/dispatcher
 
 @Injectable()
 export class TLineService {
-    constructor(private readonly postRankerService: DispatcherService) {}
+    constructor() {}
     ping() {
         return 'hi';
     }

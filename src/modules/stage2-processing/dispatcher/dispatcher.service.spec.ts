@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DispatcherService } from './dispatcher.service';
 import { describe, expect, it, beforeEach } from '@jest/globals';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
 import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import { RawPost, SortedPost } from '../../../utils/types';
 import getRaw from '../../../utils/getRawPostObject.spec.util';
 import { BatchCalculatorService } from '../batch-calculator/batch-calculator.service';
+import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 
 describe('DispatcherService', () => {
     let service: DispatcherService;
@@ -26,10 +26,9 @@ describe('DispatcherService', () => {
                     },
                 },
                 {
-                    provide: TlineCacherService,
+                    provide: RedisCacheDriverService,
                     useValue: {
-                        dispatch: jest.fn(),
-                        mutex: jest.fn(),
+                        getCachedData: jest.fn(),
                     },
                 },
             ],

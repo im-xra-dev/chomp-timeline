@@ -4,12 +4,12 @@ import { JobTypes } from '../../../utils/JobTypes';
 import { QueryPoolService } from '../../stage1-processing/query-pool/query-pool.service';
 import { DispatcherService } from '../../stage2-processing/dispatcher/dispatcher.service';
 import { BatchProcessorService } from '../../stage3-processing/batch-processor/batch-processor.service';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
+import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 
 @Injectable()
 export class PostRankerManagerService {
     constructor(
-        private readonly tlineCacherService: TlineCacherService,
+        private readonly cacheService: RedisCacheDriverService,
         private readonly queryPoolService: QueryPoolService,
         private readonly dispatcherService: DispatcherService,
         private readonly batchProcessorService: BatchProcessorService,

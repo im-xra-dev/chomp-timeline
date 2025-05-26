@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { LoadNextPostsService } from './load-next-posts.service';
-import { TlineCacherModule } from '../../tline-cacher/tline-cacher.module';
+import { RedisCacheDriverModule } from '../../redis-cache-driver/redis-cache-driver.module';
 
 @Module({
     providers: [LoadNextPostsService],
     exports: [LoadNextPostsService],
-    imports: [TlineCacherModule],
+    imports: [RedisCacheDriverModule],
 })
 export class LoadNextPostsModule {}

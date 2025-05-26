@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PostRankerManagerService } from './post-ranker-manager.service';
 import { describe, expect, it, beforeEach } from '@jest/globals';
 import { QueryPoolService } from '../../stage1-processing/query-pool/query-pool.service';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
 import { DispatcherService } from '../../stage2-processing/dispatcher/dispatcher.service';
 import { BatchProcessorService } from '../../stage3-processing/batch-processor/batch-processor.service';
+import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 
 describe('PostRankerManagerService', () => {
     let service: PostRankerManagerService;
@@ -20,9 +20,9 @@ describe('PostRankerManagerService', () => {
                     },
                 },
                 {
-                    provide: TlineCacherService,
+                    provide: RedisCacheDriverService,
                     useValue: {
-                        dispatch: jest.fn(),
+                        getCachedData: jest.fn(),
                     },
                 },
                 {
