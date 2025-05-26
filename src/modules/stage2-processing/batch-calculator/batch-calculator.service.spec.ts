@@ -32,10 +32,6 @@ describe('BatchCalculatorService', () => {
         service = module.get<BatchCalculatorService>(BatchCalculatorService);
         tLineCalculatorService = module.get<Stage2CalculationsService>(Stage2CalculationsService);
         cacherService = module.get<Stage2CacheManagementService>(Stage2CacheManagementService);
-
-        // const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');
-        // cacheSpy.mockResolvedValueOnce('sess-not-seen');
-        // cacheSpy.mockResolvedValueOnce(false);
     });
 
     it('should be defined', () => {
