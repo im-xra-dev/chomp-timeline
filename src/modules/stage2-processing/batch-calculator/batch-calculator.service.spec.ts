@@ -3,16 +3,16 @@ import { describe, expect, it, beforeEach } from '@jest/globals';
 import { BatchCalculatorService } from './batch-calculator.service';
 import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
 import { AssertionError } from 'assert';
 import { RawPost } from '../../../utils/types';
 import getRaw from '../../../utils/getRawPostObject.spec.util';
 import getSortedPostObj from '../../../utils/getSortedPostObject.spec.util';
+import { Stage2CacheManagementService } from '../stage2-cache-management/stage2-cache-management.service';
 
 describe('BatchCalculatorService', () => {
     let service: BatchCalculatorService;
     let tLineCalculatorService: Stage2CalculationsService;
-    let tlineCacherService: TlineCacherService;
+    let cacherService: Stage2CacheManagementService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -21,10 +21,9 @@ describe('BatchCalculatorService', () => {
                 Stage2CalculationsService,
                 TLineCalculatorConfigService,
                 {
-                    provide: TlineCacherService,
+                    provide: Stage2CacheManagementService,
                     useValue: {
-                        dispatch: jest.fn(),
-                        mutex: jest.fn(),
+                        getCachedData: jest.fn(),
                     },
                 },
             ],
@@ -32,11 +31,11 @@ describe('BatchCalculatorService', () => {
 
         service = module.get<BatchCalculatorService>(BatchCalculatorService);
         tLineCalculatorService = module.get<Stage2CalculationsService>(Stage2CalculationsService);
-        tlineCacherService = module.get<TlineCacherService>(TlineCacherService);
+        cacherService = module.get<Stage2CacheManagementService>(Stage2CacheManagementService);
 
-        const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');
-        cacheSpy.mockResolvedValueOnce('sess-not-seen');
-        cacheSpy.mockResolvedValueOnce(false);
+        // const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');
+        // cacheSpy.mockResolvedValueOnce('sess-not-seen');
+        // cacheSpy.mockResolvedValueOnce(false);
     });
 
     it('should be defined', () => {
@@ -71,6 +70,10 @@ describe('BatchCalculatorService', () => {
         weightSpy.mockReturnValueOnce(2);
         weightSpy.mockReturnValueOnce(REJECT_SCORE);
 
+        //mock the cache service
+        const cacheSpy = jest.spyOn(cacherService, 'getCachedData');
+        cacheSpy.mockResolvedValueOnce({ sessId: "test", cachedPosts: {}, perCommunitySeenPost: {"tests0":0}});
+
         //generates the mock data and expected output
         const expectedOrder: string[] = ['MOCK3', 'MOCK1', 'MOCK0', 'MOCK2', 'MOCK4', 'MOCK5'];
         const inputData: RawPost[] = [
@@ -93,6 +96,11 @@ describe('BatchCalculatorService', () => {
     });
 
     describe('batchCalculate', () => {
+        beforeEach(()=>{
+            const cacheSpy = jest.spyOn(cacherService, 'getCachedData');
+            cacheSpy.mockResolvedValueOnce({ sessId: "test", cachedPosts: {}, perCommunitySeenPost: {"tests0":0}});
+        })
+
         it('should throw if minScore < 0', async () => {
             //The reject score should never be negative
             const call = async () => {
@@ -180,8 +188,8 @@ describe('BatchCalculatorService', () => {
 
             //set up the cache spy to initialize the local cache
             //the local cache should be used after it has been initialized
-            const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');
-            cacheSpy.mockResolvedValueOnce(undefined);
+            const cacheSpy = jest.spyOn(cacherService, 'getCachedData').mockReset();
+            cacheSpy.mockResolvedValueOnce({ sessId: "test", cachedPosts: {}, perCommunitySeenPost: {"a":0}});
 
             //sets up input data and runs the test
             const inputData: RawPost[] = [
@@ -197,38 +205,6 @@ describe('BatchCalculatorService', () => {
             expect(spy).toHaveBeenNthCalledWith(2, RAW_SCORE, 1);
             expect(spy).toHaveBeenNthCalledWith(3, RAW_SCORE, 2);
             expect(spy).toHaveBeenNthCalledWith(4, RAW_SCORE, 3);
-        });
-    });
-
-    describe('getCachedSeenCount', () => {
-        it('should return the value stored in "seenData" if it exists', async () => {
-            //if the value is locally cached, it should return that value
-            const cacheRef = { test: 69 };
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
-            expect(out).toBe(69);
-        });
-
-        it('should return the value from redis if it exists', async () => {
-            //if the value is not locally cached, it should query it from redis
-            //if a value is returned, that is returned and stored in the cache
-            jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(69);
-
-            const cacheRef = {};
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
-
-            expect(out).toBe(69);
-            expect(cacheRef['test']).toBe(69);
-        });
-
-        it('should return 0 if value is not in local or redis cache', async () => {
-            //if the value is not locally cached, it should query it from redis
-            //if a value is not returned, it should default to 0, returning and locally caching 0
-            jest.spyOn(tlineCacherService, 'dispatch').mockReset().mockResolvedValue(undefined);
-
-            const cacheRef = {};
-            const out = await service.getOrInitializeCachedSeenCount(cacheRef, 'test', 'userId');
-            expect(out).toBe(0);
-            expect(cacheRef['test']).toBe(0);
         });
     });
 
@@ -265,10 +241,9 @@ describe('BatchCalculatorService', () => {
 
     describe('reject posts seen in this session', () => {
         it('should reject posts that have a seen sess id equal to the current session', async () => {
-            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
-            spy.mockResolvedValueOnce('sess'); //default session name for test posts
-            spy.mockResolvedValueOnce(false); // not in metadata (should not execute)
-            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+            //mock already seen with equal session
+            const spy = jest.spyOn(cacherService, 'getCachedData')
+            spy.mockResolvedValueOnce({ sessId: "sess", cachedPosts: {}, perCommunitySeenPost: {"tests0":0}});
 
             const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
 
@@ -276,10 +251,9 @@ describe('BatchCalculatorService', () => {
         });
 
         it('should reject posts that are in the metadata cache as they are already in a pool', async () => {
-            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
-            spy.mockResolvedValueOnce('sess-not-seen'); //default session name for test posts
-            spy.mockResolvedValueOnce(true); // not in metadata (should not execute)
-            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+            //mock already in cachedPosts
+            const spy = jest.spyOn(cacherService, 'getCachedData')
+            spy.mockResolvedValueOnce({ sessId: "sess-not-seen", cachedPosts: {"MOCK0": true}, perCommunitySeenPost: {"tests0":0}});
 
             const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
 
@@ -287,10 +261,9 @@ describe('BatchCalculatorService', () => {
         });
 
         it('should not reject posts that are of a different sess id and not in the metadata cache', async () => {
-            const spy = jest.spyOn(tlineCacherService, 'dispatch').mockReset();
-            spy.mockResolvedValueOnce('sess-not-seen'); //default session name for test posts
-            spy.mockResolvedValueOnce(false); // not in metadata (should not execute)
-            spy.mockResolvedValueOnce(undefined); // not in total seen cache (should not execute)
+            //mock not seen
+            const spy = jest.spyOn(cacherService, 'getCachedData')
+            spy.mockResolvedValueOnce({ sessId: "sess-not-seen", cachedPosts: {}, perCommunitySeenPost: {"tests0":0}});
 
             const output = await service.batchCalculate([getRaw(0)], 0, 'userId');
 

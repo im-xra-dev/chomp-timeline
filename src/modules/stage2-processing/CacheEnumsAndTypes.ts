@@ -6,10 +6,10 @@ export enum LookupEnum {
 export type Stage2CacheData = {
     sessId: string;
     cachedPosts: {
-        string?: boolean;
+        [key: string]: boolean;
     };
     perCommunitySeenPost: {
-        string?: number;
+        [key: string]: number;
     };
 };
 

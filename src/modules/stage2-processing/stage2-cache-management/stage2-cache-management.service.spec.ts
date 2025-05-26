@@ -1,12 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-    Stage2CacheManagementService,
-    LookupEnum,
-    LookupData, Stage2CacheData,
-} from './stage2-cache-management.service';
+import { Stage2CacheManagementService } from './stage2-cache-management.service';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import getRawPostObjectSpecUtil from '../../../utils/getRawPostObject.spec.util';
 import { RawPost } from '../../../utils/types';
+import { LookupData, LookupEnum, Stage2CacheData } from '../CacheEnumsAndTypes';
 
 describe('Stage2CacheManagementService', () => {
     let service: Stage2CacheManagementService;
@@ -41,10 +38,10 @@ describe('Stage2CacheManagementService', () => {
             multi: () => multiMock,
         });
 
-        multiMock.exec.mockResolvedValue(["sess", "1", "1"])
+        multiMock.exec.mockResolvedValue(['sess', '1', '1']);
     });
 
-    afterEach(()=>{
+    afterEach(() => {
         multiMock.get.mockReset();
         multiMock.hGet.mockReset();
         multiMock.exec.mockReset();
@@ -110,7 +107,7 @@ describe('Stage2CacheManagementService', () => {
 
             //create mocks
             const getMock = jest.spyOn(multiMock, 'get');
-            multiMock.exec.mockResolvedValue(["sess", "1", "1", "2"])
+            multiMock.exec.mockResolvedValue(['sess', '1', '1', '2']);
 
             //run test
             await service.getCachedData(userId, rawPosts);
@@ -149,7 +146,6 @@ describe('Stage2CacheManagementService', () => {
                 `${getPrefix(userId)}metadata:${generatedPostId}`,
                 'score',
             );
-
         });
     });
 
@@ -175,7 +171,6 @@ describe('Stage2CacheManagementService', () => {
 
             //session id should be set
             expect(output.sessId).toBe('sessid');
-
         });
 
         it('should add community counts to the output data as an integer', async () => {
@@ -184,7 +179,6 @@ describe('Stage2CacheManagementService', () => {
 
             //first community has 3 views
             expect(output.perCommunitySeenPost[community1]).toBe(3);
-
         });
 
         it('should initialize community counts to 0 in the output data if it has not been seen', async () => {
@@ -208,7 +202,7 @@ describe('Stage2CacheManagementService', () => {
             const output: Stage2CacheData = await service.getCachedData(userId, rawPosts);
 
             //second post has not been cached
-            expect(output.cachedPosts[`MOCK${postId+1}`]).toBe(undefined);
+            expect(output.cachedPosts[`MOCK${postId + 1}`]).toBe(undefined);
         });
     });
 });

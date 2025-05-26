@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LoadNextPostsService } from './load-next-posts.service';
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
+import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 
 describe('LoadNextPostsService', () => {
     let service: LoadNextPostsService;
@@ -11,9 +11,9 @@ describe('LoadNextPostsService', () => {
             providers: [
                 LoadNextPostsService,
                 {
-                    provide: TlineCacherService,
+                    provide: RedisCacheDriverService,
                     useValue: {
-                        dispatch: jest.fn(),
+                        getCachedData: jest.fn(),
                     },
                 },
             ],
