@@ -1,0 +1,1 @@
+export function GET_SESSION_KEY(userId) {return `tline:${userId}:sessid`}

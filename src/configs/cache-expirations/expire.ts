@@ -1,0 +1,1 @@
+export const SESS_ID_EXPIRE = 2.5 * 60 * 60; //2.5 hours
