@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, expect, it, beforeEach } from '@jest/globals';
 import { BatchCalculatorService } from './batch-calculator.service';
-import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
 import { AssertionError } from 'assert';
@@ -11,14 +11,14 @@ import getSortedPostObj from '../../../utils/getSortedPostObject.spec.util';
 
 describe('BatchCalculatorService', () => {
     let service: BatchCalculatorService;
-    let tLineCalculatorService: TLineCalculatorService;
+    let tLineCalculatorService: Stage2CalculationsService;
     let tlineCacherService: TlineCacherService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 BatchCalculatorService,
-                TLineCalculatorService,
+                Stage2CalculationsService,
                 TLineCalculatorConfigService,
                 {
                     provide: TlineCacherService,
@@ -31,7 +31,7 @@ describe('BatchCalculatorService', () => {
         }).compile();
 
         service = module.get<BatchCalculatorService>(BatchCalculatorService);
-        tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
+        tLineCalculatorService = module.get<Stage2CalculationsService>(Stage2CalculationsService);
         tlineCacherService = module.get<TlineCacherService>(TlineCacherService);
 
         const cacheSpy = jest.spyOn(tlineCacherService, 'dispatch');

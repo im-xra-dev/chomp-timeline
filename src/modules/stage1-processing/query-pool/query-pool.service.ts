@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { QueryData, QueryJobListing } from '../../../utils/types';
 import { FeedQuerier } from '../feed-querier/feed-querier.service';
-import { TLineCalculatorService } from '../../stage2-processing/t-line-calculator/t-line-calculator.service';
+import { Stage2CalculationsService } from '../../stage2-processing/stage2-calculations/stage2-calculations.service';
 
 @Injectable()
 export class QueryPoolService {
     constructor(
         private readonly neoQueryService: FeedQuerier,
-        private readonly tlineCalculatorService: TLineCalculatorService,
+        private readonly tlineCalculatorService: Stage2CalculationsService,
     ) {}
 
     /**queryAllModes

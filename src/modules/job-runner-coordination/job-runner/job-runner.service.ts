@@ -10,7 +10,7 @@ import {
 import { JobTypes } from '../../../utils/JobTypes';
 import { PostRankerManagerService } from '../post-ranker-manager/post-ranker-manager.service';
 import { InitCacheService } from '../init-cache/init-cache.service';
-import { LoadNextPostsService } from '../../stage1-processing/load-next-posts/load-next-posts.service';
+import { LoadNextPostsService } from '../load-next-posts/load-next-posts.service';
 import { ClearCacheService } from '../clear-cache/clear-cache.service';
 
 //job listings accepted by the JobRunner

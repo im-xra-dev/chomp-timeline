@@ -1,7 +1,7 @@
 //functions to handle object defaults
 
 import { CommunityRelation, PostState, UserRelation } from '../../../utils/types';
-import { TLineCalculatorService } from './t-line-calculator.service';
+import { Stage2CalculationsService } from './stage2-calculations.service';
 
 /**test utility to provide default values for the attributes not being tested
  *
@@ -74,7 +74,7 @@ export function getPostState({
  * @param postState
  */
 export function relevanceTest(
-    service: TLineCalculatorService,
+    service: Stage2CalculationsService,
     {
         secScore = 10,
         postScore = 10,

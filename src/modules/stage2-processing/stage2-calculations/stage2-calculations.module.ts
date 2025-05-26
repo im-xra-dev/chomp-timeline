@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TLineCalculatorService } from './t-line-calculator.service';
+import { Stage2CalculationsService } from './stage2-calculations.service';
 import { TLineCalculatorConfigModule } from '../../../configs/t-line-calculator.config/t-line-calculator.config.module';
 
 @Module({
-    providers: [TLineCalculatorService],
-    exports: [TLineCalculatorService],
+    providers: [Stage2CalculationsService],
+    exports: [Stage2CalculationsService],
     imports: [TLineCalculatorConfigModule],
 })
-export class TLineCalculatorModule {}
+export class Stage2CalculationsModule {}

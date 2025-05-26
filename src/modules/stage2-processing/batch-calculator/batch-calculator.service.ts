@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
 import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
-import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { TLineCacheQueriesEnum } from '../../../utils/TLineCacheQueriesEnum';
 import { RawPost, SortedPost } from '../../../utils/types';
 import {
@@ -15,7 +15,7 @@ type LocalCacheLookup = { [sec: string]: number };
 export class BatchCalculatorService {
     constructor(
         private readonly cacherService: TlineCacherService,
-        private readonly tlineCalculatorService: TLineCalculatorService,
+        private readonly tlineCalculatorService: Stage2CalculationsService,
     ) {}
 
     /**Calculates and ranks a batch of posts

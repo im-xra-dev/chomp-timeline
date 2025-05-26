@@ -4,7 +4,7 @@ import { CommunityRelation, PostState, UserRelation } from '../../../utils/types
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
 
 @Injectable()
-export class TLineCalculatorService {
+export class Stage2CalculationsService {
     constructor(private readonly config: TLineCalculatorConfigService) {}
 
     /**Calculate how many section to query to build the data

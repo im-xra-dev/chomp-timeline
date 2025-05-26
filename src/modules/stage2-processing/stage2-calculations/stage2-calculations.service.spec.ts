@@ -2,24 +2,24 @@ import { AssertionError } from 'assert';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { CommunityRelation, PostState, UserRelation } from '../../../utils/types';
-import { TLineCalculatorService } from './t-line-calculator.service';
+import { Stage2CalculationsService } from './stage2-calculations.service';
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import {
     getPostState,
     relevanceTest,
     getAuthorRelation, getCommunityRelation,
-} from './t-line-calculator.service.spec.utils';
+} from './stage2-calculations.service.spec.utils';
 
 describe('TLineCalculatorService', () => {
-    let service: TLineCalculatorService;
+    let service: Stage2CalculationsService;
     let configService: TLineCalculatorConfigService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [TLineCalculatorService, TLineCalculatorConfigService],
+            providers: [Stage2CalculationsService, TLineCalculatorConfigService],
         }).compile();
 
-        service = module.get<TLineCalculatorService>(TLineCalculatorService);
+        service = module.get<Stage2CalculationsService>(Stage2CalculationsService);
         configService = module.get<TLineCalculatorConfigService>(TLineCalculatorConfigService);
     });
 

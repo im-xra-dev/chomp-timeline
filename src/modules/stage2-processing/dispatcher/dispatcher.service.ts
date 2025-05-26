@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { BatchCalculatorService } from '../batch-calculator/batch-calculator.service';
 import { RawPost, ConcurrentBatch, SortedPost } from '../../../utils/types';
 import { strictEqual } from 'assert';
@@ -13,7 +13,7 @@ import {
 export class DispatcherService {
     constructor(
         private readonly batchCalculatorService: BatchCalculatorService,
-        private readonly tlineCalculatorService: TLineCalculatorService,
+        private readonly tlineCalculatorService: Stage2CalculationsService,
     ) {}
 
     /**dispatchConcurrentPosts o(n)

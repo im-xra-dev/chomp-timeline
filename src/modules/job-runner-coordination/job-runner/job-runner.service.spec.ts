@@ -13,7 +13,7 @@ import {
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { InitCacheService } from '../init-cache/init-cache.service';
 import { PostRankerManagerService } from '../post-ranker-manager/post-ranker-manager.service';
-import { LoadNextPostsService } from '../../stage1-processing/load-next-posts/load-next-posts.service';
+import { LoadNextPostsService } from '../load-next-posts/load-next-posts.service';
 import { ClearCacheService } from '../clear-cache/clear-cache.service';
 
 describe('JobRunnerService', () => {

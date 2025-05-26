@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DispatcherService } from './dispatcher.service';
 import { describe, expect, it, beforeEach } from '@jest/globals';
 import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
-import { TLineCalculatorService } from '../t-line-calculator/t-line-calculator.service';
+import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
 import { TLineCalculatorConfigService } from '../../../configs/t-line-calculator.config/t-line-calculator.config.service';
 import { RawPost, SortedPost } from '../../../utils/types';
 import getRaw from '../../../utils/getRawPostObject.spec.util';
@@ -10,14 +10,14 @@ import { BatchCalculatorService } from '../batch-calculator/batch-calculator.ser
 
 describe('DispatcherService', () => {
     let service: DispatcherService;
-    let tLineCalculatorService: TLineCalculatorService;
+    let tLineCalculatorService: Stage2CalculationsService;
     let batchCalculatorService: BatchCalculatorService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DispatcherService,
-                TLineCalculatorService,
+                Stage2CalculationsService,
                 TLineCalculatorConfigService,
                 {
                     provide: BatchCalculatorService,
@@ -36,7 +36,7 @@ describe('DispatcherService', () => {
         }).compile();
 
         service = module.get<DispatcherService>(DispatcherService);
-        tLineCalculatorService = module.get<TLineCalculatorService>(TLineCalculatorService);
+        tLineCalculatorService = module.get<Stage2CalculationsService>(Stage2CalculationsService);
         batchCalculatorService = module.get<BatchCalculatorService>(BatchCalculatorService);
     });
 
