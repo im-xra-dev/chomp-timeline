@@ -3,7 +3,7 @@ import { InitJobListing, JobResult } from '../../../utils/types';
 import { JobTypes } from '../../../utils/JobTypes';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import { SESS_ID_EXPIRE } from '../../../configs/cache-expirations/expire';
-import { GET_SESSION_KEY } from '../../../configs/cache-keys/expire';
+import { GET_SESSION_KEY } from '../../../configs/cache-keys/keys';
 
 @Injectable()
 export class InitCacheService {

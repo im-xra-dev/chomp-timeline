@@ -5,7 +5,7 @@ import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-dr
 import { JobTypes } from '../../../utils/JobTypes';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { SESS_ID_EXPIRE } from '../../../configs/cache-expirations/expire';
-import { GET_SESSION_KEY } from '../../../configs/cache-keys/expire';
+import { GET_SESSION_KEY } from '../../../configs/cache-keys/keys';
 
 describe('InitCacheService', () => {
     let service: InitCacheService;
