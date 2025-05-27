@@ -18,7 +18,7 @@ describe('Stage1CacheManagementService', () => {
 
     const clientMock = { multi: () => multiMock };
 
-    function getJobListing(modes: DiscoveryModes[], limit = undefined): QueryJobListing{
+    function getJobListing(modes: DiscoveryModes[], limit = undefined): QueryJobListing {
         return {
             userid: '123',
             jobType: JobTypes.QUERY,
@@ -45,11 +45,11 @@ describe('Stage1CacheManagementService', () => {
         service = module.get<Stage1CacheManagementService>(Stage1CacheManagementService);
     });
 
-    afterEach(()=>{
+    afterEach(() => {
         multiMock.get.mockReset();
         multiMock.set.mockReset();
         multiMock.exec.mockReset();
-    })
+    });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
@@ -111,11 +111,11 @@ describe('Stage1CacheManagementService', () => {
             expect(getMock).toHaveBeenCalledTimes(job.modes.length * 2);
             for (let i = 0; i < job.modes.length * 2; i += 2) {
                 expect(getMock).toHaveBeenNthCalledWith(
-                    i,
+                    i + 1,
                     GET_PER_CACHE_LIMIT_KEY(job.userid, job.modes[i / 2]),
                 );
                 expect(getMock).toHaveBeenNthCalledWith(
-                    i + 1,
+                    i + 2,
                     GET_PER_CACHE_SKIP_KEY(job.userid, job.modes[i / 2]),
                 );
             }
@@ -133,8 +133,8 @@ describe('Stage1CacheManagementService', () => {
             const output = await service.getCacheData(job);
 
             //validate test
-            expect(output[MODE].limit).toHaveBeenCalledTimes(LIMIT);
-            expect(output[MODE].skip).toHaveBeenCalledTimes(0);
+            expect(output[MODE].limit).toBe(LIMIT);
+            expect(output[MODE].skip).toBe(0);
         });
 
         it('should format the default data for un-initialized pre-caches', async () => {
@@ -149,8 +149,8 @@ describe('Stage1CacheManagementService', () => {
             const output = await service.getCacheData(job);
 
             //validate test
-            expect(output[MODE].limit).toHaveBeenCalledTimes(defaults[MODE].limit);
-            expect(output[MODE].skip).toHaveBeenCalledTimes(defaults[MODE].skip);
+            expect(output[MODE].limit).toBe(defaults[MODE].limit);
+            expect(output[MODE].skip).toBe(defaults[MODE].skip);
         });
 
         it('should format the data returned for each pre-cache', async () => {
@@ -167,13 +167,13 @@ describe('Stage1CacheManagementService', () => {
             const output = await service.getCacheData(job);
 
             //validate test
-            expect(output[MODE].limit).toHaveBeenCalledTimes(MOCK_LIMIT);
-            expect(output[MODE].skip).toHaveBeenCalledTimes(MOCK_SKIP);
+            expect(output[MODE].limit).toBe(MOCK_LIMIT);
+            expect(output[MODE].skip).toBe(MOCK_SKIP);
         });
     });
 
     describe('setting the limit and skip if the pre-cache has not been initialized', () => {
-        async function run(MODE: DiscoveryModes){
+        async function run(MODE: DiscoveryModes) {
             //init data
             const job: QueryJobListing = getJobListing([MODE]);
 
@@ -196,7 +196,6 @@ describe('Stage1CacheManagementService', () => {
                 GET_PER_CACHE_SKIP_KEY(job.userid, MODE),
                 defaults[MODE].skip,
             );
-
         }
 
         it('should set the skip/limit to the default value if none is found for RECOMMENDED_USER', async () => {
