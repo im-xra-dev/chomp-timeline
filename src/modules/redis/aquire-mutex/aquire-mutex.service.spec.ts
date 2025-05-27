@@ -52,6 +52,11 @@ describe('AquireMutexService', () => {
             //setup spies
             const setSpy = jest.spyOn(redisMock, 'set');
             setSpy.mockResolvedValue('OK');
+            setSpy.mockImplementation((path: string, signature: string, params: {EX: number, NX: boolean})=>{
+                expect(path).toBe(CACHE_LOCK_PATH);
+                expect(params.EX).toBe(MUTEX_LOCK_EXPIRE);
+                expect(params.NX).toBe(true);
+            })
 
             //run test
             const output = await service.aquireLock(CACHE_LOCK_PATH, CACHE_PATH);
@@ -68,6 +73,11 @@ describe('AquireMutexService', () => {
 
             //setup spies
             const setSpy = jest.spyOn(redisMock, 'set');
+            setSpy.mockImplementation((path: string, signature: string, params: {EX: number, NX: boolean})=>{
+                expect(path).toBe(CACHE_LOCK_PATH);
+                expect(params.EX).toBe(MUTEX_LOCK_EXPIRE);
+                expect(params.NX).toBe(true);
+            })
             setSpy.mockResolvedValue('OK');
             //mocks the first reply to be null, meaning the lock is already held
             setSpy.mockResolvedValueOnce(null);
