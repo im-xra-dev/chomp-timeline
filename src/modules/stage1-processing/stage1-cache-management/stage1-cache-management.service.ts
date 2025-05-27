@@ -4,10 +4,7 @@ import { QueryJobListing } from '../../../utils/types';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { GET_PER_CACHE_LIMIT_KEY, GET_PER_CACHE_SKIP_KEY } from '../../../configs/cache-keys/keys';
 import { defaults } from '../../../configs/pre-cache-configuration/defaults';
-
-export type ParsedQueryConfiguration = {
-    [key: number]: { skip: number; limit: number };
-};
+import { ParsedQueryConfiguration } from '../types';
 
 type UninitializedData = { mode: number; limit: number; skip: number }[]
 
@@ -16,7 +13,8 @@ export class Stage1CacheManagementService {
     constructor(private readonly cacheService: RedisCacheDriverService) {}
 
     /**getCacheData
-     * gets the data from the cache that is used
+     * gets the skip and limit data from the cache, initializing with defaults, and allowing
+     * jobs to override the limit
      *
      * @param job
      */
@@ -28,11 +26,24 @@ export class Stage1CacheManagementService {
         const cachedValues = await this.queryData(job.userid, job.modes);
 
         //format the returned data
-        return await this.formatFromQuery(job.userid, job.modes, cachedValues);
+        const formatted = await this.formatFromQuery(job.modes, cachedValues);
+
+        //if data must be initialized, write it to the instance
+        if(formatted.unInitialized.length !== 0) await this.writeData(job.userid, formatted.unInitialized);
+
+        //return the formatted output
+        return formatted.output;
     }
 
+    /**queryData
+     * This function queries the skip and limit data from the redis instance
+     *
+     * @param userId
+     * @param modes
+     * @private
+     */
     private async queryData(userId: string, modes: DiscoveryModes[]): Promise<unknown[]> {
-        //initialilze the query client
+        //initialize the query client
         const client = await this.cacheService.getClient();
         const builder = client.multi();
 
@@ -47,8 +58,15 @@ export class Stage1CacheManagementService {
         return await builder.exec();
     }
 
+    /**writeData
+     * This function writes the default skip and limit data from the redis instance
+     *
+     * @param userId
+     * @param inputData
+     * @private
+     */
     private async writeData(userId: string, inputData: UninitializedData) {
-        //initialilze the query client
+        //initialize the query client
         const client = await this.cacheService.getClient();
         const builder = client.multi();
 
@@ -63,11 +81,18 @@ export class Stage1CacheManagementService {
         return await builder.exec();
     }
 
+    /**formatFromQuery
+     * This function formats the data returned from redis
+     * In the event of data not being cached, this function uses the defaults and flags it for writing
+     *
+     * @param modes
+     * @param data
+     * @private
+     */
     private async formatFromQuery(
-        userId: string,
         modes: DiscoveryModes[],
         data: unknown[],
-    ): Promise<ParsedQueryConfiguration> {
+    ): Promise<{output: ParsedQueryConfiguration, unInitialized: UninitializedData}> {
         //init vars
         const output: ParsedQueryConfiguration = {};
         const unInitialized: UninitializedData = [];
@@ -92,17 +117,21 @@ export class Stage1CacheManagementService {
             }
         }
 
-        //if data must be initialized, write it to the instance
-        if(unInitialized.length !== 0) await this.writeData(userId, unInitialized);
-
-        return output;
+        return {output, unInitialized};
     }
 
+    /**formatFromJob
+     * This function sets the limit for all discovery modes based on the "query" limit specified in
+     * the job. It also sets skip to 0 for this configuration mode
+     *
+     * @param job
+     * @private
+     */
     private formatFromJob(job: QueryJobListing): ParsedQueryConfiguration {
         //init vars
         const output: ParsedQueryConfiguration = {};
 
-        //set the jobs configured value for each discovery mode
+        //set the jobs configured limit value for each discovery mode
         for (let i = 0; i < job.modes.length; i++) {
             const mode = job.modes[i];
             output[mode] = {limit: job.query, skip: 0};
