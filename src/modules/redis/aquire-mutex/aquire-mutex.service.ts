@@ -19,6 +19,16 @@ export type AquiredLock = {
 export class AquireMutexService {
     constructor(private readonly cacheClient: RedisCacheDriverService) {}
 
+    /**aquireLock
+     * Acquires a new lock on the redis database.
+     * if available, lock is resolved immediately
+     * if not, the system will re-attempt acquiring the lock until successful
+     * if there are too many unsuccessful attempts, a failsafe is triggered, terminating the attempt
+     *
+     * @param lockPath
+     * @param dataPath
+     * @param depth
+     */
     async aquireLock(lockPath: string, dataPath: string, depth = 0): Promise<AquiredLock> {
         //initialize the client
         const client = await this.cacheClient.getClient();
@@ -27,13 +37,13 @@ export class AquireMutexService {
         const signature = this.genUniqueSignature();
         const expAt = new Date().getTime() + MUTEX_LOCK_EXPIRE * 1000;
 
-        //attempt to get the lock
+        //attempt to set the lock with the generated signature
         const status = await client.set(lockPath, signature, {
             EX: MUTEX_LOCK_EXPIRE,
             NX: true,
         });
 
-        //redis returns null when a value is set and configured to only set if it does not exist
+        //redis returns null when a value is already set and using NX:true (lock held by another process)
         if (status === null) {
             //failsafe to stop infinite recursion
             if (depth >= FAILSAFE_ACQUIRE_LOCK_RECURSION)
@@ -55,7 +65,9 @@ export class AquireMutexService {
                 }, totalTimeout);
             });
         }
+
         //redis returns status "OK" if setNX was successful
+        //this means the lock was acquired
         if (status === 'OK') {
             return {
                 dataPath: dataPath,
@@ -69,6 +81,11 @@ export class AquireMutexService {
         throw new InvalidDataError('status', status);
     }
 
+    /**releaseLock
+     * releases the lock held by the system
+     *
+     * @param lock
+     */
     async releaseLock(lock: AquiredLock): Promise<boolean> {
         //if the lock has expired, return false
         if (lock.expAt < new Date().getTime()) return false;
@@ -85,6 +102,13 @@ export class AquireMutexService {
         return true;
     }
 
+    /**genUniqueSignature
+     * generates a unique 6 digit code to sign the lock with
+     * this ensures that the lock can be identified from other potential
+     * clients who may be attempting to acquire the lock
+     *
+     * @private
+     */
     private genUniqueSignature() {
         let output = '';
         for (let i = 0; i < 6; i++) {
