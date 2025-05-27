@@ -59,7 +59,7 @@ export interface QueryJobListing extends GenericJobListing {
     //modes for the query
     readonly modes: DiscoveryModes[];
     //how large should the queried input be
-    readonly query: number;
+    readonly query?: number;
     //how large should the cache // output be
     readonly cache: number;
 }
