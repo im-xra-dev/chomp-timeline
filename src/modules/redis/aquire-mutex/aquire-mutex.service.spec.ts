@@ -156,7 +156,7 @@ describe('AquireMutexService', () => {
             const signature = '123456';
             const lockPath = GET_PRE_CACHE_LOCK_KEY(userId, DiscoveryModes.FOLLOWED_USER);
             const lock: AquiredLock = {
-                expAt: new Date().getTime() - MUTEX_LOCK_EXPIRE * 1000,
+                expAt: new Date().getTime() - 1,
                 dataPath: GET_PRE_CACHE_KEY(userId, DiscoveryModes.FOLLOWED_USER),
                 lockPath: lockPath,
                 uniqueSignature: signature,
