@@ -32,7 +32,7 @@ describe('InitCacheService', () => {
         service = module.get<InitCacheService>(InitCacheService);
         cache = module.get<RedisCacheDriverService>(RedisCacheDriverService);
 
-        // @ts-expect-error - mocked data is only mocking required functions and irrelevant ones are un mocked
+       
         jest.spyOn(cache, 'getClient').mockResolvedValue(RedisMock);
     });
 
