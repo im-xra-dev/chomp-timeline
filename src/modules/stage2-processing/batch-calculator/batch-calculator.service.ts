@@ -1,21 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { strictEqual } from 'assert';
-import { TlineCacherService } from '../../tline-cacher/tline-cacher.service';
 import { Stage2CalculationsService } from '../stage2-calculations/stage2-calculations.service';
-import { TLineCacheQueriesEnum } from '../../../utils/TLineCacheQueriesEnum';
+import { Stage2CacheManagementService } from '../stage2-cache-management/stage2-cache-management.service';
 import { RawPost, SortedPost } from '../../../utils/types';
-import {
-    failsafe,
-    FAILSAFE_BATCH_SIZE,
-} from '../../../configs/failsafes/limits';
+import { failsafe, FAILSAFE_BATCH_SIZE } from '../../../configs/failsafes/limits';
+import { Stage2CacheData } from '../CacheEnumsAndTypes';
 
 type LocalCacheLookup = { [sec: string]: number };
 
 @Injectable()
 export class BatchCalculatorService {
     constructor(
-        private readonly cacherService: TlineCacherService,
-        private readonly tlineCalculatorService: Stage2CalculationsService,
+        private readonly cacherService: Stage2CacheManagementService,
+        private readonly calculationsService: Stage2CalculationsService,
     ) {}
 
     /**Calculates and ranks a batch of posts
@@ -49,17 +46,15 @@ export class BatchCalculatorService {
         const seenDataLocalCacheRef: LocalCacheLookup = {};
         const sortedDataRef: SortedPost[] = [];
 
-        // get session id for user userId
-        const sessId = await this.cacherService.dispatch(TLineCacheQueriesEnum.GET_SESSION_ID, {
-            userId,
-        });
+        // get cached data for this batch
+        const cachedData = await this.cacherService.getCachedData(userId, batch);
 
         //calculate scores for all posts in batch and sort them from best to worst
         //if a posts score indicates that it will never be used, reject it as there is no point processing it
         for (let i = 0; i < batch.length; i++) {
             await this.processPost_mutatesSeenCacheAndSortedList(
                 userId,
-                sessId as string, //TODO fix when cache <T> setup
+                cachedData,
                 sortedDataRef,
                 seenDataLocalCacheRef,
                 batch[i],
@@ -74,7 +69,7 @@ export class BatchCalculatorService {
     // this function handles the calculation of weights, rejection and insertion of an individual post
     private async processPost_mutatesSeenCacheAndSortedList(
         userId: string,
-        sessId: string,
+        cachedData: Stage2CacheData,
         sortedDataRef: SortedPost[],
         seenDataLocalCacheRef: LocalCacheLookup,
         rawPost: RawPost,
@@ -85,21 +80,13 @@ export class BatchCalculatorService {
         if (rawPost.secRelation.muted) return;
 
         // if the user last viewed this post in the current session, reject post
-        if (rawPost.postState.sess === sessId) return;
-
-        //TODO:::: IMPORTANT this should be batched outside of loop !!!!!
-        //TODO:::: per community seen count too
-        //TODO:::: sessid in same batch
-        const inMetadata = await this.cacherService.dispatch(
-            TLineCacheQueriesEnum.EXISTS_IN_METADATA,
-            { userId, postId: rawPost.id },
-        );
+        if (rawPost.postState.sess === cachedData.sessId) return;
 
         // if the post is already in a cached pool, reject post
-        if (inMetadata) return;
+        if (cachedData.cachedPosts[rawPost.id]) return;
 
         //calculate the raw score for this post
-        const rawScore: number = this.tlineCalculatorService.calculateRelevanceScore(
+        const rawScore: number = this.calculationsService.calculateRelevanceScore(
             rawPost.secPersonalScore,
             rawPost.postPersonalScore,
             rawPost.authorsPersonalScore,
@@ -111,15 +98,11 @@ export class BatchCalculatorService {
         if (rawScore <= rejectScore) return; //reject post
 
         //get total posts from this category that have been seen
-        const seen: number = await this.getOrInitializeCachedSeenCount(
-            seenDataLocalCacheRef,
-            rawPost.sec,
-            userId,
-        );
+        const seen: number = cachedData.perCommunitySeenPost[rawPost.sec];
 
         //calculate the weighted score based on how many have been seen from this category
         //this is to create variation in the feed so the same category doesnt come up many times in a row
-        const weightScore: number = this.tlineCalculatorService.calculateTotalSeenWeight(
+        const weightScore: number = this.calculationsService.calculateTotalSeenWeight(
             rawScore,
             seen,
         );
@@ -127,37 +110,7 @@ export class BatchCalculatorService {
 
         //sort the un-rejected post and update seen cache
         this.insertPostInPlaceHighToLow(sortedDataRef, rawPost, weightScore);
-        seenDataLocalCacheRef[rawPost.sec]++;
-    }
-
-    //util: interfaces with the caches to figure out how many posts from 'sec' have been marked as seen
-    // it first checks its local cache in seenDataRef.
-    // if it does not exist locally, it queries from redis and writes it into the local cache (default to 0 if not found)
-    async getOrInitializeCachedSeenCount(
-        seenDataRef: LocalCacheLookup,
-        sec: string,
-        userId: string,
-    ): Promise<number> {
-        //return locally cached value if it exists
-        if (seenDataRef[sec] !== undefined) return seenDataRef[sec];
-
-        try {
-            //set the local cache value by moving the redis cached value to local cache (defaults to 0 if not exists)
-            const seenCount: unknown = await this.cacherService.dispatch(
-                TLineCacheQueriesEnum.GET_SEEN_COUNT_PER_COMMUNITY,
-                { userId, sec },
-            );
-            if (seenCount === undefined) seenDataRef[sec] = 0;
-            else seenDataRef[sec] = seenCount as number;
-
-            return seenDataRef[sec];
-        } catch (e) {
-            //Failsafe with no data seen, though this error should be looked into
-            //as it could indicate an issue with redis or a networking outage
-            console.error(e);
-            seenDataRef[sec] = 0;
-            return 0;
-        }
+        cachedData.perCommunitySeenPost[rawPost.sec]++;
     }
 
     //util: sorts an individual post in to the already sorted array
