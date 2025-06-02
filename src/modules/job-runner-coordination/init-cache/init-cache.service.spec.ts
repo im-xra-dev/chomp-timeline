@@ -47,6 +47,7 @@ describe('InitCacheService', () => {
 
     describe('initialize the cache tests', () => {
         it('should abort if the cache is already initialized', async () => {
+           //the presence of a session ID means that the session is initialized. as it is a random string, the content is not important
             RedisMock.get.mockResolvedValue('dhfaasjk');
 
             const output: JobTypes = await service.initJob({
