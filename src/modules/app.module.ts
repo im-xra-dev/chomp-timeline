@@ -8,7 +8,7 @@ import { ClearCacheModule } from './job-runner-coordination/clear-cache/clear-ca
 import { InitCacheModule } from './job-runner-coordination/init-cache/init-cache.module';
 import { LoadNextPostsModule } from './job-runner-coordination/load-next-posts/load-next-posts.module';
 import { NeoDriverModule } from './neo-driver/neo-driver.module';
-// import { Stage2CacheManagementModule } from './stage2-processing/stage2-cache-management/stage2-cache-management.module';
+import { Stage2CacheManagementModule } from './stage2-processing/stage2-cache-management/stage2-cache-management.module';
 
 @Module({
     imports: [
