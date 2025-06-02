@@ -21,7 +21,7 @@ import { Stage2CacheManagementModule } from './stage2-processing/stage2-cache-ma
         InitCacheModule,
         LoadNextPostsModule,
         NeoDriverModule,
-        Stage2CacheManagementModule,
+        // Stage2CacheManagementModule,
     ],
 })
 export class AppModule {}
