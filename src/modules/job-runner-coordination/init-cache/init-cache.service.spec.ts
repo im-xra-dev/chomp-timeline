@@ -23,7 +23,7 @@ describe('InitCacheService', () => {
                 {
                     provide: RedisCacheDriverService,
                     useValue: {
-                        getClient: jest.fn(),
+                        getClient: () => RedisMock
                     },
                 },
             ],
