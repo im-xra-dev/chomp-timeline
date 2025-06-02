@@ -58,10 +58,10 @@ export interface QueryJobListing extends GenericJobListing {
     readonly jobType: JobTypes.QUERY | CASCADE;
     //modes for the query
     readonly modes: DiscoveryModes[];
-    //how large should the queried input be
+    //how large should the queried input be (default value is stored in cache)
     readonly query?: number;
-    //how large should the cache // output be
-    readonly cache: number;
+    //how large should the cache // output be (default value is stored in cache)
+    readonly cache?: number;
 }
 
 export interface LoadJobListing extends GenericJobListing {
