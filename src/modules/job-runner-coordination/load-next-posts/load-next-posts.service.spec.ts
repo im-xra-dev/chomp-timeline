@@ -25,4 +25,10 @@ describe('LoadNextPostsService', () => {
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
+
+    describe('move posts from specified caches to the finalpool cache', () => {
+        it('should get a lock on all specified pools', async () => {});
+        it('should get a move posts from each pool until final pool is filled', async () => {});
+        it('remove all locks', async () => {});
+    });
 });

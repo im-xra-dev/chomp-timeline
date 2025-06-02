@@ -8,7 +8,7 @@ export class LoadNextPostsService {
     constructor(private readonly cacheService: RedisCacheDriverService) {}
 
     async loadJob(job: LoadJobListing): Promise<JobResult> {
-        //move from one cache to the other
+        //move 'publish' qty of posts from the 'modes' caches to the finalpool cache
         return JobTypes.CONTINUE;
     }
 }
