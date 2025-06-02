@@ -33,7 +33,7 @@ describe('InitCacheService', () => {
         cache = module.get<RedisCacheDriverService>(RedisCacheDriverService);
 
        
-        jest.spyOn(cache, 'getClient').mockResolvedValue(RedisMock);
+        
     });
 
     afterEach(() => {
