@@ -68,6 +68,8 @@ describe('LoadNextPostsService', () => {
             BroadcastCachePostsService,
         );
         broadcastNewJobService = module.get<BroadcastNewJobService>(BroadcastNewJobService);
+
+        RedisMock.exec.mockResolvedValue(["123321"]);
     });
 
     afterEach(() => {
@@ -226,7 +228,7 @@ describe('LoadNextPostsService', () => {
 
             //evaluate test
             expect(out).toBe(JobTypes.ABORT);
-            expect(releaseLockSpy).not.toHaveBeenCalled();
+            expect(releaseLockSpy).toHaveBeenCalled();
             expect(RedisMock.exec).not.toHaveBeenCalled();
         });
     });
@@ -281,6 +283,7 @@ describe('LoadNextPostsService', () => {
             broadcastSpy.mockImplementation(async (generatedJob: QueryLoadJobListing) => {
                 for (let i = 0; i < MODES.length; i++)
                     expect(generatedJob.modes).toContain(MODES[i]);
+                    expect(generatedJob.publish).toBe(publishedPosts.length);
             });
 
             //run test
@@ -310,6 +313,7 @@ describe('LoadNextPostsService', () => {
             broadcastSpy.mockImplementation(async (generatedJob: QueryLoadJobListing) => {
                 expect(generatedJob.modes).toContain(DiscoveryModes.FOLLOWED_USER);
                 expect(generatedJob.modes.length).toBe(1);
+                expect(generatedJob.publish).toBe(1);
             });
 
             //run test
@@ -425,10 +429,10 @@ describe('LoadNextPostsService', () => {
             releaseLockSpy.mockResolvedValue(true);
             for (let i = 0; i < MODES.length; i++) acquireLockResolveOnce(job.modes[i], userId);
 
-            RedisMock.lMove.mockImplementation((source, dest, right, left) => {
-                expect(right.toBe('RIGHT'));
-                expect(left.toBe('LEFT'));
-                expect(dest.toBe(GET_FINAL_POOL_KEY(userId)));
+            RedisMock.lMove.mockImplementation((source, dest, left, right) => {
+                expect(left).toBe('LEFT');
+                expect(right).toBe('RIGHT');
+                expect(dest).toBe(GET_FINAL_POOL_KEY(userId));
 
                 if (moveSourceParams[source]) moveSourceParams[source]++;
                 else moveSourceParams[source] = 1;
