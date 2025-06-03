@@ -27,8 +27,15 @@ describe('LoadNextPostsService', () => {
     });
 
     describe('move posts from specified caches to the finalpool cache', () => {
+        it('should get a lock on a pre-cache pool', async () => {});
+        it('should get a move "publish" qty posts from the pre-cache pool to the final pool', async () => {});
+        it('should remove the specified lock', async () => {});
+
         it('should get a lock on all specified pools', async () => {});
-        it('should get a move posts from each pool until final pool is filled', async () => {});
-        it('remove all locks', async () => {});
+        it('should move "publish" qty posts from each pool until final pool is filled', async () => {});
+        it('should take from each pool a qty based on configured weights', async () => {});
+        it('should remove all locks', async () => {});
+
+        it('should broadcast the published post IDs to the queue', async () => {});
     });
 });
