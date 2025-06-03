@@ -107,6 +107,7 @@ export class LoadNextPostsService {
         return { newJobModes, toCache, missedCount };
     }
 
+    //https://blog.mischel.com/2015/03/26/evenly-distributing-items-in-a-list/
     private initializeHeap(modes: DiscoveryModes[]): HeapObj[] {
         const heap: HeapObj[] = [];
         const totalWeightScore = this.sumWeights(modes);
