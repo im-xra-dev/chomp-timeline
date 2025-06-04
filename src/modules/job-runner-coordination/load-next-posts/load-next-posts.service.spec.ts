@@ -14,6 +14,7 @@ import {
 } from '../../../configs/cache-keys/keys';
 import { defaults as PUBLISH_WEIGHTS } from '../../../configs/load-more-posts/publish-weightings';
 import { BroadcastNewJobService } from '../../queue-management/broadcasters/broadcast-new-job/broadcast-new-job.service';
+import { FINAL_POOL_EXPIRE, PRE_CACHE_POOL_EXPIRE } from '../../../configs/cache-expirations/expire';
 
 describe('LoadNextPostsService', () => {
     let service: LoadNextPostsService;
@@ -23,6 +24,7 @@ describe('LoadNextPostsService', () => {
 
     const RedisMock = {
         lMove: jest.fn(),
+        expire: jest.fn(),
         exec: jest.fn(),
     };
 
@@ -79,6 +81,7 @@ describe('LoadNextPostsService', () => {
         acquireLockSpy.mockReset();
         releaseLockSpy.mockReset();
         RedisMock.lMove.mockReset();
+        RedisMock.expire.mockReset();
         RedisMock.exec.mockReset();
     });
 
@@ -113,6 +116,43 @@ describe('LoadNextPostsService', () => {
         for (let i = 0; i < MODES.length; i++) sum += PUBLISH_WEIGHTS[MODES[i]];
         return sum;
     }
+
+    describe('updates expiration times', () => {
+        it('should update the expiration times on all pools including the final pool', async () => {
+            //setup test data
+            const MODES = [
+                DiscoveryModes.FOLLOWED_SUBSECTION,
+                DiscoveryModes.RECOMMENDED_SUBSECTION,
+                DiscoveryModes.FOLLOWED_USER,
+                DiscoveryModes.RECOMMENDED_USER,
+            ];
+            const userId = 'abcdef';
+            const job = getJob(MODES, userId);
+
+            //setup spies
+            const releaseLockSpy = jest.spyOn(lockService, 'releaseLock');
+            releaseLockSpy.mockResolvedValue(true);
+            for (let i = 0; i < MODES.length; i++) acquireLockResolveOnce(job.modes[i], userId);
+
+            //run test
+            const out = await service.loadJob(job);
+
+            //evaluate test
+            expect(out).toBe(JobTypes.CONTINUE);
+            expect(RedisMock.expire).toBeCalledTimes(MODES.length + 1);
+            expect(RedisMock.expire).toBeCalledWith(
+                GET_FINAL_POOL_KEY(userId),
+                FINAL_POOL_EXPIRE,
+            );
+            for (let i = 0; i < MODES.length; i++){
+                expect(RedisMock.expire).toBeCalledWith(
+                    GET_PRE_CACHE_KEY(userId, MODES[i]),
+                    PRE_CACHE_POOL_EXPIRE,
+                );
+            }
+        });
+
+    });
 
     describe('locks are aquired and released', () => {
         it('should get a lock on a pre-cache pool', async () => {
