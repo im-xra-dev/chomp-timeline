@@ -80,6 +80,7 @@ describe('ClearCacheService', () => {
     });
 
     afterEach(() => {
+        jest.spyOn(lockService, 'aquireLock').mockReset();
         mockClient.del.mockReset();
         RedisMock.del.mockReset();
         RedisMock.lRange.mockReset();
@@ -147,7 +148,7 @@ describe('ClearCacheService', () => {
             expect(RedisMock.del).toBeCalledWith(GET_FINAL_POOL_KEY(USER_ID));
         });
 
-        it('should clear finalpool cachesize', async () => {
+        it('should clear final pool cachesize', async () => {
             await service.clearCacheJob(mockClearJob);
                 expect(RedisMock.del).toBeCalledWith(GET_CACHE_SIZE_KEY(USER_ID, "finalpool"));
         });
@@ -172,6 +173,7 @@ describe('ClearCacheService', () => {
             expect(mockClient.del).toBeCalledTimes(1);
         });
 
+        //util to convert ID to metadata key
         const mutatorParseKeys = (refMetadataKeys: string[], data: string[]) => {
             for (let i = 0; i < data.length; i++)
                 refMetadataKeys.push(GET_METADATA_KEY(USER_ID, data[i]));

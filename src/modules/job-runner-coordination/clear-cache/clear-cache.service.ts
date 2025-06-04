@@ -20,7 +20,15 @@ export class ClearCacheService {
         private readonly lockService: AquireMutexService,
     ) {}
 
+    /**clearCacheJob
+     * clears a users cache
+     *
+     * percategory is left to expire on its own
+     *
+     * @param job
+     */
     async clearCacheJob(job: CacheClearJobListing): Promise<JobResult> {
+        //init data
         const userId = job.userid;
         const client = await this.cacheService.getClient();
         const builder = client.multi();
@@ -28,9 +36,9 @@ export class ClearCacheService {
         //delete the sessions id
         builder.del(GET_SESSION_KEY(userId));
 
-        //delete all pre-cache data
+        //delete all pre-cache pool data
         for(let i = 0; i < cleanupModes.length; i++){
-            //loads the cached posts to delete their metadata
+            //loads the cached posts to delete their metadata later
             builder.lRange(GET_PRE_CACHE_KEY(userId, cleanupModes[i]), 0, -1);
 
             //clears the cache, and its skip/limit/size configuration
@@ -40,12 +48,13 @@ export class ClearCacheService {
             builder.del(GET_CACHE_SIZE_KEY(userId, cleanupModes[i]));
         }
 
-        //delete final pool data
+        //delete final pool data and its cache size.
+        // also gets posts stored here to delete their metadata later
         builder.lRange(GET_FINAL_POOL_KEY(userId), 0, -1);
         builder.del(GET_FINAL_POOL_KEY(userId));
         builder.del(GET_CACHE_SIZE_KEY(userId, "finalpool"));
 
-        //lock, run the batched builder and release locks
+        //acquire locks, run the batch and finally release locks
         const locks: AquiredLock[] = await this.acquireLocks(userId);
         const output = await builder.exec();
         await this.releaseLocks(locks);
@@ -59,8 +68,18 @@ export class ClearCacheService {
         return JobTypes.CONTINUE;
     }
 
+    /**parseOutput
+     * parses the list of status codes and data returned by the batch process
+     * and extracts all the post IDs
+     *
+     * these post IDs are then re-formatted into the key that links to their associated
+     * metadata stored in the cache. This list of keys is then returned
+     *
+     * @param userId
+     * @param output
+     * @private
+     */
     private parseOutput(userId: string, output: unknown[]): string[]{
-        //init
         const outputKeys: string[] = [];
 
         //for all output data, find the arrays returned
@@ -79,6 +98,13 @@ export class ClearCacheService {
         return outputKeys;
     }
 
+    /**acquireLocks
+     *
+     * acquires all the locks and throws if an error occurred (releasing acquired locks first)
+     *
+     * @param userId
+     * @private
+     */
     private async acquireLocks(userId: string): Promise<AquiredLock[]> {
         const locks: AquiredLock[] = [];
         try {
@@ -97,6 +123,12 @@ export class ClearCacheService {
         return locks;
     }
 
+    /**releaseLocks
+     * it releases the acquired locks (wow I could have never guessed that)
+     *
+     * @param locks
+     * @private
+     */
     private async releaseLocks(locks: AquiredLock[]){
         for (let i = 0; i < locks.length; i++) await this.lockService.releaseLock(locks[i]);
     }
