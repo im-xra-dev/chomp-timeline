@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConcurrentBatch, QueryData } from '../../../utils/types';
+import { ConcurrentBatch } from '../../../utils/types';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class BatchProcessorService {
     //worst no-action case iterates o(rb) == o(n) -- already all seen (for each batch; discard all b posts)
     //best re-order case iterates o(rc) == o(fn) -> o(n) -- none discarded, each batch (r) iterates over top [c] elements
     //worst re-order case iterates o(rb+rc)) == o(n + fn) == o((f+1)n) -> o(n) -- one in each batch kept; all others discarded. each batch iterates over b (posts) + c
-    async processBatches(mode: DiscoveryModes, batchRunners: readonly ConcurrentBatch[], jobCacheOverride?: number): Promise<void> {
+    async processBatches(userId: string, mode: DiscoveryModes, batchRunners: readonly ConcurrentBatch[], jobCacheOverride?: number): Promise<void> {
         // for each concurrent job
         //   sortedB = await concurrentJobs[i]
         //   sortedC = currentCache of length <= job.cache
