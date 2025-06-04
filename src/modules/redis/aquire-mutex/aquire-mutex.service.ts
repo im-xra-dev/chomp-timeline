@@ -44,27 +44,7 @@ export class AquireMutexService {
         });
 
         //redis returns null when a value is already set and using NX:true (lock held by another process)
-        if (status === null) {
-            //failsafe to stop infinite recursion
-            if (depth >= FAILSAFE_ACQUIRE_LOCK_RECURSION)
-                throw new AcquireLockError(lockPath, depth);
-
-            return new Promise((resolve, reject) => {
-                //jitter from (-1/2 * timeout) to (+1/2 * timeout) to de-sync attempts
-                const timeoutMs = MUTEX_LOCK_FAILED_TIMEOUT_EXPIRE * 1000;
-                const jitterMs = Math.floor(Math.random() * timeoutMs) - timeoutMs / 2;
-                const totalTimeout = timeoutMs + jitterMs;
-
-                //retry
-                setTimeout(async () => {
-                    try{
-                        resolve(await this.aquireLock(lockPath, dataPath, depth + 1));
-                    }catch (e) {
-                        reject(e)
-                    }
-                }, totalTimeout);
-            });
-        }
+        if (status === null) return this.waitForLock(lockPath, dataPath, depth);
 
         //redis returns status "OK" if setNX was successful
         //this means the lock was acquired
@@ -100,6 +80,37 @@ export class AquireMutexService {
         //release the lock
         await client.del(lock.lockPath);
         return true;
+    }
+
+    /**waitForLock
+     * handles calculating the wait time to retry and get a lock
+     *
+     * @param lockPath
+     * @param dataPath
+     * @param depth
+     * @private
+     */
+    private async waitForLock(lockPath: string, dataPath: string, depth: number): Promise<AquiredLock>{
+        //failsafe to stop infinite recursion
+        if (depth >= FAILSAFE_ACQUIRE_LOCK_RECURSION)
+            throw new AcquireLockError(lockPath, depth);
+
+        return new Promise((resolve, reject) => {
+            //jitter from (-1/2 * timeout) to (+1/2 * timeout) to de-sync attempts
+            const timeoutMs = MUTEX_LOCK_FAILED_TIMEOUT_EXPIRE * 1000;
+            const jitterMs = Math.floor(Math.random() * timeoutMs) - timeoutMs / 2;
+            const totalTimeout = timeoutMs + jitterMs;
+
+            //retry
+            setTimeout(async () => {
+                try{
+                    resolve(await this.aquireLock(lockPath, dataPath, depth + 1));
+                }catch (e) {
+                    reject(e)
+                }
+            }, totalTimeout);
+        });
+
     }
 
     /**genUniqueSignature
