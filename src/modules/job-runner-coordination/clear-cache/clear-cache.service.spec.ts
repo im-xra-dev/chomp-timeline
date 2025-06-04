@@ -3,13 +3,14 @@ import { ClearCacheService } from './clear-cache.service';
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import {
+    GET_CACHE_SIZE,
     GET_FINAL_POOL_KEY,
-    GET_METADATA_KEY,
+    GET_METADATA_KEY, GET_PER_CACHE_LIMIT_KEY, GET_PER_CACHE_SKIP_KEY,
     GET_PRE_CACHE_KEY,
     GET_PRE_CACHE_LOCK_KEY,
     GET_SESSION_KEY,
 } from '../../../configs/cache-keys/keys';
-import modes from '../../../configs/cleanup/modes';
+import modes from '../../../configs/pre-cache-configuration/cleanup-modes';
 import { AquiredLock, AquireMutexService } from '../../redis/aquire-mutex/aquire-mutex.service';
 import { CacheClearJobListing } from '../../../utils/types';
 import { JobTypes } from '../../../utils/JobTypes';
@@ -115,6 +116,15 @@ describe('ClearCacheService', () => {
             await service.clearCacheJob(mockClearJob);
             for (let i = 0; i < modes.length; i++)
                 expect(RedisMock1.del).toBeCalledWith(GET_PRE_CACHE_KEY(USER_ID, modes[i]));
+        });
+
+        it('should clear all pre-cache metadata (cachesize, skip, limit)', async () => {
+            await service.clearCacheJob(mockClearJob);
+            for (let i = 0; i < modes.length; i++){
+                expect(RedisMock1.del).toBeCalledWith(GET_PER_CACHE_SKIP_KEY(USER_ID, modes[i]));
+                expect(RedisMock1.del).toBeCalledWith(GET_PER_CACHE_LIMIT_KEY(USER_ID, modes[i]));
+                expect(RedisMock1.del).toBeCalledWith(GET_CACHE_SIZE(USER_ID, modes[i]));
+            }
         });
 
         it('should release locks on all the pre-caches', async () => {
