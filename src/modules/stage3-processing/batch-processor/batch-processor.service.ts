@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConcurrentBatch, QueryData } from '../../../utils/types';
+import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 
 @Injectable()
 export class BatchProcessorService {
@@ -16,7 +17,7 @@ export class BatchProcessorService {
     //worst no-action case iterates o(rb) == o(n) -- already all seen (for each batch; discard all b posts)
     //best re-order case iterates o(rc) == o(fn) -> o(n) -- none discarded, each batch (r) iterates over top [c] elements
     //worst re-order case iterates o(rb+rc)) == o(n + fn) == o((f+1)n) -> o(n) -- one in each batch kept; all others discarded. each batch iterates over b (posts) + c
-    async processBatches(batchRunners: readonly ConcurrentBatch[]): Promise<QueryData> {
+    async processBatches(mode: DiscoveryModes, batchRunners: readonly ConcurrentBatch[], jobCacheOverride?: number): Promise<void> {
         // for each concurrent job
         //   sortedB = await concurrentJobs[i]
         //   sortedC = currentCache of length <= job.cache
@@ -43,6 +44,14 @@ export class BatchProcessorService {
         //       CACHE1 update section totalPosts data in :sec:[secid] ++
         //       CACHE1 update seen wB, sec, state etc
         //       break
-        return {};
+
+        // c = cachesize
+        //const newMin = output[c] score
+        //for startCache[c->0]
+        //   if get(score) < newMin:
+        //      set seen false && sec total -- && clear attrs
+        //   else break;
+
+        return;
     }
 }
