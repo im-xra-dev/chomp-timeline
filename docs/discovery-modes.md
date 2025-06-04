@@ -2,7 +2,7 @@
 
 The discovery modes are the different ways in which the system discovers 
 candidate posts for the users timeline. Each discovery mode has its own
-associated database query, pre-cache pool and associated configurations.
+associated database query, pre-cache pool and configurations.
 
 ## Enabling/disabling modes
 
@@ -60,8 +60,8 @@ Pre-cache skip, limit and initial cache size must be configured in `configs/pre-
 Cleanup must also be configured in `configs/pre-cache-configuration/cleanup-modes.ts` to ensure data is cleaned up
 by ClearCache jobs.
 
-The discovery mode must be enabled in the `configs/discovery-modes/enabled.ts` file. While a mode not being present
-in this file will be treated as a disabled mode, it is best practice to add it with a value of false.
+The discovery mode must be added to the `configs/discovery-modes/enabled.ts` file. While a mode not being present
+in this file will be treated as a disabled mode, it is best practice to add disabled modes with a value of false.
 
 Discovery Mode weightings must be configured in `configs/load-more-posts/publish-weightings.ts`. These values
 represent how many posts from this discovery mode appear in the feed as ratio to other discovery modes. For example
