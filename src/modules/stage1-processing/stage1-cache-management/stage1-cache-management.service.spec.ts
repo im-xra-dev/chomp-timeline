@@ -6,6 +6,7 @@ import { JobTypes } from '../../../utils/JobTypes';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { GET_PER_CACHE_LIMIT_KEY, GET_PER_CACHE_SKIP_KEY } from '../../../configs/cache-keys/keys';
 import { defaults } from '../../../configs/pre-cache-configuration/defaults';
+import { LIMIT_EXPIRE, SKIP_EXPIRE } from '../../../configs/cache-expirations/expire';
 
 describe('Stage1CacheManagementService', () => {
     let service: Stage1CacheManagementService;
@@ -190,11 +191,13 @@ describe('Stage1CacheManagementService', () => {
                 1,
                 GET_PER_CACHE_LIMIT_KEY(job.userid, MODE),
                 defaults[MODE].limit,
+                { EX: LIMIT_EXPIRE },
             );
             expect(setMock).toHaveBeenNthCalledWith(
                 2,
                 GET_PER_CACHE_SKIP_KEY(job.userid, MODE),
                 defaults[MODE].skip,
+                { EX: SKIP_EXPIRE },
             );
         }
 
