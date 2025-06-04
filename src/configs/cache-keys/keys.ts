@@ -7,5 +7,5 @@ export function GET_PER_CACHE_LIMIT_KEY(userId:string, cacheId:DiscoveryModes) {
 export function GET_PER_CACHE_SKIP_KEY(userId:string, cacheId:DiscoveryModes) {return `tline:${userId}:skip:${cacheId}`}
 export function GET_PRE_CACHE_KEY(userId:string, cacheId:DiscoveryModes) {return `tline:${userId}:precache:${cacheId}`}
 export function GET_PRE_CACHE_LOCK_KEY(userId:string, cacheId:DiscoveryModes) {return `tline:${userId}:precachelock:${cacheId}`}
-export function GET_FINAL_POOL_KEY(userId:string,) {return `tline:${userId}:finalpool`}
-export function GET_CACHE_SIZE(userId:string,cacheId:DiscoveryModes|"finalpool") {return `tline:${userId}:cachesize:${cacheId}`}
+export function GET_FINAL_POOL_KEY(userId:string) {return `tline:${userId}:finalpool`}
+export function GET_CACHE_SIZE_KEY(userId:string, cacheId:DiscoveryModes|"finalpool") {return `tline:${userId}:cachesize:${cacheId}`}

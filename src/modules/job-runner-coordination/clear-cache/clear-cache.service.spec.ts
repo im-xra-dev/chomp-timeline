@@ -3,7 +3,7 @@ import { ClearCacheService } from './clear-cache.service';
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import {
-    GET_CACHE_SIZE,
+    GET_CACHE_SIZE_KEY,
     GET_FINAL_POOL_KEY,
     GET_METADATA_KEY, GET_PER_CACHE_LIMIT_KEY, GET_PER_CACHE_SKIP_KEY,
     GET_PRE_CACHE_KEY,
@@ -19,21 +19,21 @@ describe('ClearCacheService', () => {
     let service: ClearCacheService;
     let lockService: AquireMutexService;
 
-    const RedisMock1 = {
+    const RedisMock = {
         del: jest.fn(),
         lRange: jest.fn(),
         exec: jest.fn(),
     };
 
     const mockClient = {
-        multi: () => RedisMock1,
+        multi: () => RedisMock,
         del: jest.fn(),
     };
 
     const USER_ID = '123321';
     let locks: AquiredLock[] = [];
 
-    const lockGenerator = (lockPath: string, dataPath: string): AquiredLock => {
+    const lockGenerator = async (lockPath: string, dataPath: string): Promise<AquiredLock> => {
         const newLock: AquiredLock = {
             dataPath: dataPath,
             lockPath: lockPath,
@@ -57,13 +57,13 @@ describe('ClearCacheService', () => {
                 {
                     provide: RedisCacheDriverService,
                     useValue: {
-                        getClient: mockClient,
+                        getClient: () => mockClient,
                     },
                 },
                 {
                     provide: AquireMutexService,
                     useValue: {
-                        aquireLock: lockGenerator,
+                        aquireLock: jest.fn(),
                         releaseLock: jest.fn(),
                     },
                 },
@@ -74,12 +74,16 @@ describe('ClearCacheService', () => {
         lockService = module.get<AquireMutexService>(AquireMutexService);
 
         jest.spyOn(lockService, 'releaseLock').mockResolvedValue(true);
+        jest.spyOn(lockService, 'aquireLock').mockImplementation(lockGenerator);
+
+        RedisMock.exec.mockResolvedValue([]);
     });
 
     afterEach(() => {
-        RedisMock1.del.mockReset();
-        RedisMock1.lRange.mockReset();
-        RedisMock1.exec.mockReset();
+        mockClient.del.mockReset();
+        RedisMock.del.mockReset();
+        RedisMock.lRange.mockReset();
+        RedisMock.exec.mockReset();
         locks = [];
     });
 
@@ -90,7 +94,7 @@ describe('ClearCacheService', () => {
     describe('should clear all the cache elements', () => {
         it('should clear the session ID', async () => {
             await service.clearCacheJob(mockClearJob);
-            expect(RedisMock1.del).toBeCalledWith(GET_SESSION_KEY(USER_ID));
+            expect(RedisMock.del).toBeCalledWith(GET_SESSION_KEY(USER_ID));
         });
 
         it('should acquire locks on all the pre-caches', async () => {
@@ -105,7 +109,7 @@ describe('ClearCacheService', () => {
         it('should load all pre-cached posts into memory', async () => {
             await service.clearCacheJob(mockClearJob);
             for (let i = 0; i < modes.length; i++)
-                expect(RedisMock1.lRange).toBeCalledWith(
+                expect(RedisMock.lRange).toBeCalledWith(
                     GET_PRE_CACHE_KEY(USER_ID, modes[i]),
                     0,
                     -1,
@@ -115,15 +119,15 @@ describe('ClearCacheService', () => {
         it('should clear all the pre-caches', async () => {
             await service.clearCacheJob(mockClearJob);
             for (let i = 0; i < modes.length; i++)
-                expect(RedisMock1.del).toBeCalledWith(GET_PRE_CACHE_KEY(USER_ID, modes[i]));
+                expect(RedisMock.del).toBeCalledWith(GET_PRE_CACHE_KEY(USER_ID, modes[i]));
         });
 
         it('should clear all pre-cache metadata (cachesize, skip, limit)', async () => {
             await service.clearCacheJob(mockClearJob);
             for (let i = 0; i < modes.length; i++){
-                expect(RedisMock1.del).toBeCalledWith(GET_PER_CACHE_SKIP_KEY(USER_ID, modes[i]));
-                expect(RedisMock1.del).toBeCalledWith(GET_PER_CACHE_LIMIT_KEY(USER_ID, modes[i]));
-                expect(RedisMock1.del).toBeCalledWith(GET_CACHE_SIZE(USER_ID, modes[i]));
+                expect(RedisMock.del).toBeCalledWith(GET_PER_CACHE_SKIP_KEY(USER_ID, modes[i]));
+                expect(RedisMock.del).toBeCalledWith(GET_PER_CACHE_LIMIT_KEY(USER_ID, modes[i]));
+                expect(RedisMock.del).toBeCalledWith(GET_CACHE_SIZE_KEY(USER_ID, modes[i]));
             }
         });
 
@@ -135,12 +139,17 @@ describe('ClearCacheService', () => {
 
         it('read the content of the final pool', async () => {
             await service.clearCacheJob(mockClearJob);
-            expect(RedisMock1.lRange).toBeCalledWith(GET_FINAL_POOL_KEY(USER_ID), 0, -1);
+            expect(RedisMock.lRange).toBeCalledWith(GET_FINAL_POOL_KEY(USER_ID), 0, -1);
         });
 
         it('should clear the final pool cache', async () => {
             await service.clearCacheJob(mockClearJob);
-            expect(RedisMock1.del).toBeCalledWith(GET_FINAL_POOL_KEY(USER_ID));
+            expect(RedisMock.del).toBeCalledWith(GET_FINAL_POOL_KEY(USER_ID));
+        });
+
+        it('should clear finalpool cachesize', async () => {
+            await service.clearCacheJob(mockClearJob);
+                expect(RedisMock.del).toBeCalledWith(GET_CACHE_SIZE_KEY(USER_ID, "finalpool"));
         });
 
         it('should remove the metadata for the IDs which were returned', async () => {
@@ -154,7 +163,7 @@ describe('ClearCacheService', () => {
             mutatorParseKeys(metadataKeys, precache1);
             mutatorParseKeys(metadataKeys, precache2);
 
-            RedisMock1.exec.mockResolvedValue(dataReturnedFromRedis);
+            RedisMock.exec.mockResolvedValue(dataReturnedFromRedis);
 
             //run test
             await service.clearCacheJob(mockClearJob);
