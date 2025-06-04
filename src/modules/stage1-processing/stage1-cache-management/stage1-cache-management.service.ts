@@ -5,6 +5,7 @@ import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 import { GET_PER_CACHE_LIMIT_KEY, GET_PER_CACHE_SKIP_KEY } from '../../../configs/cache-keys/keys';
 import { defaults } from '../../../configs/pre-cache-configuration/defaults';
 import { ParsedQueryConfiguration } from '../types';
+import { LIMIT_EXPIRE, SKIP_EXPIRE } from '../../../configs/cache-expirations/expire';
 
 type UninitializedData = { mode: number; limit: number; skip: number }[]
 
@@ -73,8 +74,8 @@ export class Stage1CacheManagementService {
         //set the limit and skip for each mode
         for (let i = 0; i < inputData.length; i++) {
             const singleMode = inputData[i];
-            builder.set(GET_PER_CACHE_LIMIT_KEY(userId, singleMode.mode), singleMode.limit);
-            builder.set(GET_PER_CACHE_SKIP_KEY(userId, singleMode.mode), singleMode.skip);
+            builder.set(GET_PER_CACHE_LIMIT_KEY(userId, singleMode.mode), singleMode.limit, {EX: LIMIT_EXPIRE});
+            builder.set(GET_PER_CACHE_SKIP_KEY(userId, singleMode.mode), singleMode.skip, {EX: SKIP_EXPIRE});
         }
 
         //run the query
