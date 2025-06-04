@@ -37,7 +37,7 @@ export type SortedPost = Readonly<{
 }>;
 
 export type ConcurrentBatch = Promise<readonly SortedPost[]>;
-export type QueryData = { [jobMode: string]: readonly SortedPost[] };
+export type QueryData = { [jobMode: number]: readonly RawPost[] };
 
 export type CASCADE = JobTypes.QUERY_LOAD | JobTypes.INIT;
 export type JobResult = JobTypes.ABORT | JobTypes.CONTINUE;

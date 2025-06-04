@@ -9,8 +9,11 @@
 ## Jobs
 [Read about the event jobs listened for](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/job-types.md)
 
+## Discovery Modes
+[Read about the candidate post Discovery Modes](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/discovery-modes.md)
+
 ## Querying candidates
-[Read about generation of a candidate pool](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/query.md)
+[Read about generation of a candidate pool](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/querying.md)
 
 ## Data flow
 [Read about the flow of data through the system](https://github.com/im-xra-dev/chomp-timeline/tree/main/docs/data-flow.md)
