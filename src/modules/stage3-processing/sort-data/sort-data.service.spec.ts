@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import {
     GET_CACHE_DATA_WITH_SIZE,
     GET_CACHE_DATA_WITHOUT_SIZE,
-} from '../stage3-cache-management/stage3-cache-management.service.spec';
+} from './cache-get-data.spec.util';
 
 describe('SortDataService', () => {
   let service: SortDataService;

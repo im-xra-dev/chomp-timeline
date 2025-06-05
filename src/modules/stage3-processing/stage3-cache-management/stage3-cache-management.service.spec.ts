@@ -5,7 +5,8 @@ import {
     GET_CACHE_SIZE_KEY,
     GET_METADATA_KEY,
     GET_PER_CATEGORY_KEY,
-    GET_PRE_CACHE_KEY, GET_PRE_CACHE_LOCK_KEY,
+    GET_PRE_CACHE_KEY,
+    GET_PRE_CACHE_LOCK_KEY,
 } from '../../../configs/cache-keys/keys';
 import {
     METADATA_EXPIRE,
@@ -15,15 +16,12 @@ import {
 import { RedisCacheDriverService } from '../../redis-cache-driver/redis-cache-driver.service';
 import { DiscoveryModes } from '../../../utils/DiscoveryModes';
 
-export const GET_CACHE_DATA_WITH_SIZE = [5, 'ID1', 100, 'ID2', 10];
-export const GET_CACHE_DATA_WITHOUT_SIZE = ['ID1', 100, 'ID2', 10];
-
 describe('Stage3CacheManagementService', () => {
     let service: Stage3CacheManagementService;
 
     //test configuration data
     const USER_ID = '123321';
-    const COMMUNITY_NAME = "test-community";
+    const COMMUNITY_NAME = 'test-community';
     const MODE = DiscoveryModes.FOLLOWED_SUBSECTION;
 
     //redis mock stuff
@@ -84,21 +82,21 @@ describe('Stage3CacheManagementService', () => {
 
     describe('get the currently cached data', () => {
         const lock = {
-            uniqueSignature: "string",
+            uniqueSignature: 'string',
             lockPath: GET_PRE_CACHE_LOCK_KEY(USER_ID, MODE),
             dataPath: GET_PRE_CACHE_KEY(USER_ID, MODE),
             expAt: new Date().getTime() + 99999,
         };
 
-        const sortCallTest = ()=>{
+        const sortCallTest = () => {
             expect(RedisMock.sort).toBeCalledWith(lock.dataPath, {
                 BY: 'nosort',
                 GET: ['#', `${GET_METADATA_KEY(USER_ID, '*')}->score`],
             });
-        }
+        };
 
         it('should get the currently cached pool and associated metadata', async () => {
-            await service.getCurrentPrecachePoolData(USER_ID, lock, true)
+            await service.getCurrentPrecachePoolData(USER_ID, lock, true);
 
             sortCallTest();
             expect(RedisMock.get).toBeCalledWith(GET_CACHE_SIZE_KEY(USER_ID, MODE));
@@ -106,7 +104,7 @@ describe('Stage3CacheManagementService', () => {
         });
 
         it('should not get the current cachesize', async () => {
-            await service.getCurrentPrecachePoolData(USER_ID, lock, false)
+            await service.getCurrentPrecachePoolData(USER_ID, lock, false);
 
             sortCallTest();
             expect(RedisMock.get).not.toBeCalled();
@@ -116,9 +114,9 @@ describe('Stage3CacheManagementService', () => {
 
     describe('handling metadata ', () => {
         const postLookup = {
-            'AAAAAA': getMockedPost('AAAAAA', 10),
-            'BBBBBB': getMockedPost('BBBBBB', 5),
-        }
+            AAAAAA: getMockedPost('AAAAAA', 10),
+            BBBBBB: getMockedPost('BBBBBB', 5),
+        };
         const newPosts = ['AAAAAA', 'BBBBBB'];
         const removedPosts = ['CCCCCC', 'EEEEEE'];
         //what happened to the Ds you ask?? what didnt happen to Ds ;)
@@ -127,7 +125,7 @@ describe('Stage3CacheManagementService', () => {
             await service.updatePostMetaData(newPosts, removedPosts, postLookup);
 
             expect(RedisMock.expire).toBeCalledTimes(newPosts.length);
-            for (let i = 0; i < newPosts.length; i++){
+            for (let i = 0; i < newPosts.length; i++) {
                 expect(RedisMock.expire).toBeCalledWith(
                     GET_METADATA_KEY(USER_ID, newPosts[i]),
                     METADATA_EXPIRE,
@@ -145,7 +143,7 @@ describe('Stage3CacheManagementService', () => {
             const acceptedPaths = [
                 GET_METADATA_KEY(USER_ID, newPosts[0]),
                 GET_METADATA_KEY(USER_ID, newPosts[1]),
-            ]
+            ];
 
             //check hSetNX is called with the correct params
             RedisMock.hSetNX.mockImplementation((path: string, key: string, value: number) => {
@@ -156,7 +154,7 @@ describe('Stage3CacheManagementService', () => {
                 if (key === 'score') expect(value).toBe(`${post.score}`);
                 else if (key === 'seen') expect(value).toBe(`${post.seen}`);
                 else if (key === 'vote') expect(value).toBe(`${post.vote}`);
-                else expect(`the key ${key}`).toBe("never set on the metadata")
+                else expect(`the key ${key}`).toBe('never set on the metadata');
             });
 
             await service.updatePostMetaData(newPosts, removedPosts, postLookup);
@@ -166,15 +164,15 @@ describe('Stage3CacheManagementService', () => {
 
     describe('updating the cached data', () => {
         const lock = {
-            uniqueSignature: "string",
+            uniqueSignature: 'string',
             lockPath: GET_PRE_CACHE_LOCK_KEY(USER_ID, MODE),
             dataPath: GET_PRE_CACHE_KEY(USER_ID, MODE),
             expAt: new Date().getTime() + 99999,
         };
 
         it('should remove old pool and rPush in the new one', async () => {
-            const newPool = ['a','b','c'];
-            const lookup = {'community1': 2, 'community2': -2};
+            const newPool = ['a', 'b', 'c'];
+            const lookup = { community1: 2, community2: -2 };
             await service.updateThePoolData(lock, newPool, lookup);
 
             expect(RedisMock.del).toBeCalledTimes(1);
@@ -183,18 +181,18 @@ describe('Stage3CacheManagementService', () => {
             expect(RedisMock.rPush).toBeCalledTimes(1);
             expect(RedisMock.rPush).toBeCalledWith(lock.dataPath, newPool);
 
-            expect(RedisMock.expire).toBeCalledWith(
-                lock.dataPath,
-                PRE_CACHE_POOL_EXPIRE,
-            );
-        })
+            expect(RedisMock.expire).toBeCalledWith(lock.dataPath, PRE_CACHE_POOL_EXPIRE);
+        });
 
         it('should increase and decrease per-category counts for added/removed posts', async () => {
-            const newPool = ['a','b','c'];
-            const lookup = {'community1': 2, 'community2': -2};
+            const newPool = ['a', 'b', 'c'];
+            const lookup = { community1: 2, community2: -2 };
             await service.updateThePoolData(lock, newPool, lookup);
 
-            expect(RedisMock.incrBy).toBeCalledWith(GET_PER_CATEGORY_KEY(USER_ID, COMMUNITY_NAME), 2);
+            expect(RedisMock.incrBy).toBeCalledWith(
+                GET_PER_CATEGORY_KEY(USER_ID, COMMUNITY_NAME),
+                2,
+            );
             expect(RedisMock.incrBy).toBeCalledWith(GET_PER_CATEGORY_KEY(USER_ID, 'community'), -2);
 
             expect(RedisMock.expire).toBeCalledWith(
