@@ -1,0 +1,1 @@
+export const BUFFER = 10 * 1000;

@@ -1,48 +1,66 @@
 import { Injectable } from '@nestjs/common';
-import { ConcurrentBatch, QueryData } from '../../../utils/types';
+import { ConcurrentBatch, SortedPost } from '../../../utils/types';
+import { DiscoveryModes } from '../../../utils/DiscoveryModes';
+import { AquireMutexService } from '../../redis/aquire-mutex/aquire-mutex.service';
+import { SortDataService } from '../sort-data/sort-data.service';
+import { MetadataManagementService } from '../metadata-management/metadata-management.service';
+import { Stage3CacheManagementService } from '../stage3-cache-management/stage3-cache-management.service';
+import { GET_PRE_CACHE_KEY, GET_PRE_CACHE_LOCK_KEY } from '../../../configs/cache-keys/keys';
+import { BUFFER } from '../../../configs/stage-3-lock-buffer/config';
 
 @Injectable()
 export class BatchProcessorService {
+    constructor(
+        private readonly lockService: AquireMutexService,
+        private readonly sortDataService: SortDataService,
+        private readonly metadataService: MetadataManagementService,
+        private readonly stage3CacheService: Stage3CacheManagementService,
+    ) {}
 
-    // n = number of posts found
-    // c = specified cache size (constant)
-    // i (dealBatchCount) = (Math.floor(Math.sqrt(2 * c))) (constant)
-    // f = c/i (constant fraction that is the co-efficient in fn = rc)
-    // r = number of runners (total batches)
-    // r = n / i
-    // b = n/r (posts per runner job)
-    //r <= n
-    //best no-action case iterates o(r) == o(n/i) -> o(n) -- already sorted (for each batch; nothing of interest)
-    //worst no-action case iterates o(rb) == o(n) -- already all seen (for each batch; discard all b posts)
-    //best re-order case iterates o(rc) == o(fn) -> o(n) -- none discarded, each batch (r) iterates over top [c] elements
-    //worst re-order case iterates o(rb+rc)) == o(n + fn) == o((f+1)n) -> o(n) -- one in each batch kept; all others discarded. each batch iterates over b (posts) + c
-    async processBatches(batchRunners: readonly ConcurrentBatch[]): Promise<QueryData> {
-        // for each concurrent job
-        //   sortedB = await concurrentJobs[i]
-        //   sortedC = currentCache of length <= job.cache
-        //   sortingBC = [];
-        //   bool: cAtCapacity = cached.length === job.cache
-        //   if cAtCapacity: lowest = getWeight(sortedC[last]);
-        //   else lowest = -1;
-        //   discard,b,c = 0;
-        //   while  c+b-discard <= job.cache;
-        //     if b < length of sortedB
-        //       sB_elm = sortedB[b]
-        //       if (seen sB_elm) b++; discard++; continue;
-        //       wB = sB_elm weight
-        //     else wB = -2
-        //
-        //     if first valid post is worse than worst in C then its already ordered
-        //     if (b-discard === 0 && wB < lowest) sortingBC = sortedC; break;
-        //     while c+b-discard <= job.cache
-        //       sC_id = sortedC[c]
-        //       wC = getWeight(sC_id);
-        //       if (wC > wB) c++; sortingBC.push(sC_id); continue?
-        //       b++; sortingBC.push(sB_elm.id)
-        //       set:  seen && attrs && sec total ++
-        //       CACHE1 update section totalPosts data in :sec:[secid] ++
-        //       CACHE1 update seen wB, sec, state etc
-        //       break
-        return {};
+    async processBatches(
+        userId: string,
+        mode: DiscoveryModes,
+        batchRunners: readonly ConcurrentBatch[],
+        jobSizeCacheOverride?: number,
+    ): Promise<boolean> {
+        //wait for the concurrent batches to finish processing
+        const batches: SortedPost[][] = [];
+        for (let i = 0; i < batchRunners.length; i++) batches.push(await batchRunners[i]);
+
+        //acquire a lock on the pool
+        const lock = await this.lockService.aquireLock(
+            GET_PRE_CACHE_LOCK_KEY(userId, mode),
+            GET_PRE_CACHE_KEY(userId, mode),
+        );
+
+        const loadSizeFromCache = jobSizeCacheOverride === undefined;
+        const rawInitialCacheData = await this.stage3CacheService.getCurrentPrecachePoolData(userId, lock, loadSizeFromCache);
+        const cacheSize = loadSizeFromCache ? rawInitialCacheData[0] as number : jobSizeCacheOverride;
+        const parsedInitialCacheData = this.sortDataService.parseCurrentCachedData(rawInitialCacheData, loadSizeFromCache ? 1 : 0);
+
+
+        // TODO for each proposedCacheData, postDataLookup[id] = SortedPost
+        const proposedCacheData = this.sortDataService.sortData(cacheSize, parsedInitialCacheData, batches);
+
+
+        // TODO CachedPostObj to contain community
+        // TODO {newPosts, removedPosts, communityCountChangeLookup} ??
+        const {newPosts, removedPosts} = this.metadataService.getAdditionsAndRemovals(proposedCacheData, parsedInitialCacheData);
+
+        if(lock.expAt < new Date().getTime() + BUFFER){
+            //abort this attempt as there is less than the configured buffer time to update the caches
+            await this.lockService.releaseLock(lock);
+            return false;
+        }
+
+        const postDataLookup: {[key:string]: SortedPost} = {} //TODO
+        const communityCountChangeLookup: {[key:string]: number} = {} //TODO
+
+        const postMetaUpdateResults = await this.stage3CacheService.updatePostMetaData(newPosts, removedPosts, postDataLookup);
+        const newGeneratedCache = this.metadataService.removePostsThatFailedMetaWrite(postMetaUpdateResults, newPosts, proposedCacheData);
+
+        await this.stage3CacheService.updateThePoolData(lock, newGeneratedCache, communityCountChangeLookup);
+        await this.lockService.releaseLock(lock);
+        return true;
     }
 }

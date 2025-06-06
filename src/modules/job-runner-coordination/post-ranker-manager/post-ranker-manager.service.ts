@@ -25,13 +25,6 @@ export class PostRankerManagerService {
         // job = dispatchConcurrentPosts;
         // output = await batch-processor
 
-        // c = cachesize
-        //const newMin = output[c] score
-        //for startCache[c->0]
-        //   if get(score) < newMin:
-        //      set seen false && sec total -- && clear attrs
-        //   else break;
-
         //return total added
         return JobTypes.CONTINUE;
     }

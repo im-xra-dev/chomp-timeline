@@ -36,7 +36,7 @@ export type SortedPost = Readonly<{
     score: number;
 }>;
 
-export type ConcurrentBatch = Promise<readonly SortedPost[]>;
+export type ConcurrentBatch = Promise<SortedPost[]>;
 export type QueryData = { [jobMode: string]: readonly SortedPost[] };
 
 export type CASCADE = JobTypes.QUERY_LOAD | JobTypes.INIT;
