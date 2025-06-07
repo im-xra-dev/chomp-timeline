@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { cachedPostObj } from '../sort-data/sort-data.service';
+import { CachedPostObj } from '../sort-data/sort-data.service';
+
+export type CommunityLookup = { [key: string]: number };
 
 @Injectable()
 export class MetadataManagementService {
-
-    getAdditionsAndRemovals(proposedCache: readonly cachedPostObj[], originalCache: readonly cachedPostObj[]): {newPosts: string[], removedPosts: string[]}{
+    getAdditionsAndRemovals(
+        proposedCache: readonly CachedPostObj[],
+        originalCache: readonly CachedPostObj[],
+    ): { newPosts: string[], removedPosts: string[], communityCountChangeLookup: CommunityLookup } {
         const newPosts: string[] = [];
         const removedPosts: string[] = [];
+        const communityCountChangeLookup: CommunityLookup = {}; //TODO REWRITE TESTS
 
-        return {newPosts, removedPosts}
+        return { newPosts, removedPosts, communityCountChangeLookup };
     }
 
     /**removePostsThatFailedMetaWrite
@@ -18,7 +23,11 @@ export class MetadataManagementService {
      * @param newPosts
      * @param proposedCache
      */
-    removePostsThatFailedMetaWrite(redisData: readonly unknown[], newPosts: readonly string[], proposedCache: readonly cachedPostObj[]): string[]{
-        return []
+    removePostsThatFailedMetaWrite(
+        redisData: readonly unknown[],
+        newPosts: readonly string[],
+        proposedCache: readonly CachedPostObj[],
+    ): string[] {
+        return [];
     }
 }

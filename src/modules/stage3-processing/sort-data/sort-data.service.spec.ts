@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { cachedPostObj, SortDataService } from './sort-data.service';
+import { CachedPostObj, SortDataService } from './sort-data.service';
 import { describe, expect, it } from '@jest/globals';
 import {
     GET_CACHE_DATA_WITH_SIZE,
@@ -30,7 +30,7 @@ describe('SortDataService', () => {
         score: score,
     });
 
-    const getCachedPostObj = (id: string, score: number): cachedPostObj => {
+    const getCachedPostObj = (id: string, score: number): CachedPostObj => {
         return {id, score};
     }
 

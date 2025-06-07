@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MetadataManagementService } from './metadata-management.service';
 import { describe, expect, it } from '@jest/globals';
-import { cachedPostObj } from '../sort-data/sort-data.service';
+import { CachedPostObj } from '../sort-data/sort-data.service';
 
 describe('MetadataManagementService', () => {
     let service: MetadataManagementService;
@@ -18,7 +18,7 @@ describe('MetadataManagementService', () => {
         expect(service).toBeDefined();
     });
 
-    const getCachedPostObj = (id: string, score: number): cachedPostObj => {
+    const getCachedPostObj = (id: string, score: number): CachedPostObj => {
         return { id, score };
     };
 
